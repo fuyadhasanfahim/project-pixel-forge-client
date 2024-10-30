@@ -160,6 +160,7 @@ export default function AddOrderForm() {
                     handleFileUpload={handleFileUpload}
                     files={files}
                     uploadProgress={uploadProgress}
+                    imageUrls={imageUrls}
                 />
 
                 <SelectServiceAndComplexities

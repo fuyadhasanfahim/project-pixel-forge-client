@@ -28,4 +28,5 @@ export interface IUploadFilesProps {
     handleFileUpload: (files: File[]) => void
     files: File[]
     uploadProgress: number
+    imageUrls: string[]
 }
