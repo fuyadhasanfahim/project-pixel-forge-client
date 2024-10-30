@@ -4,7 +4,7 @@ interface IOrders {
     username: string
     services: string[]
     complexities: Record<string, string>
-    additionalInstructions: string
+    instructions: string
     outputFormat: string
     deliveryDate: Date
     status:

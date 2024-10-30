@@ -270,9 +270,11 @@ export default function OrderInfo() {
                         </div>
                     </div>
 
-                    <div>
-                        <strong>Additional Instructions:</strong>{' '}
-                        {order?.additionalInstructions || 'None'}
+                    <div className="flex gap-x-2">
+                        <strong>Instructions:</strong>
+                        <p className="whitespace-pre-line">
+                            {order?.instructions || 'None'}
+                        </p>
                     </div>
 
                     <div className="flex justify-between items-center flex-wrap gap-5">

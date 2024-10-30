@@ -35,6 +35,7 @@ export default function AddOrderForm() {
     const [uploadProgress, setUploadProgress] = useState<number>(0)
     const [uploading, setUploading] = useState<boolean>(false)
     const [folderUrl, setFolderUrl] = useState<string>('')
+    const [imageUrls, setImageUrls] = useState<string[]>([])
 
     const [uploadFiles] = useUploadFilesMutation()
     const [postOrder, { isLoading }] = usePostOrderMutation()
@@ -49,24 +50,12 @@ export default function AddOrderForm() {
     }, [date, time])
 
     const handleFileUpload = async (newFiles: File[]) => {
-        const selectedServiceKeys = Object.keys(selectedServices).filter(
-            (service) => selectedServices[service],
-        )
-
-        if (selectedServiceKeys.length === 0) {
-            toast.error(
-                'Please select at least one service before uploading files.',
-            )
-            return
-        }
-
         setFiles(newFiles)
         setUploading(true)
 
         const formData = new FormData()
-        newFiles.forEach((file) => formData.append('images', file))
         formData.append('username', username)
-        formData.append('services', JSON.stringify(selectedServiceKeys))
+        newFiles.forEach((file) => formData.append('images', file))
 
         toast
             .promise(
@@ -76,8 +65,9 @@ export default function AddOrderForm() {
                         onProgress: setUploadProgress,
                     }).unwrap()
 
-                    if (response?.folderUrl) {
+                    if (response?.folderUrl && response?.imageUrls) {
                         setFolderUrl(response.folderUrl)
+                        setImageUrls(response?.imageUrls)
                         return 'Files uploaded successfully.'
                     } else {
                         throw new Error('Failed to upload files.')
@@ -139,6 +129,7 @@ export default function AddOrderForm() {
             deliveryDate,
             folderUrl,
             images: files.length,
+            imageUrls,
         }
 
         try {
@@ -165,11 +156,16 @@ export default function AddOrderForm() {
                 </h1>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
+                <UploadFiles
+                    handleFileUpload={handleFileUpload}
+                    files={files}
+                    uploadProgress={uploadProgress}
+                />
+
                 <SelectServiceAndComplexities
                     handleServiceChange={handleServiceChange}
                     handleComplexityChange={handleComplexityChange}
                     selectedServices={selectedServices}
-                    disabled={uploading}
                 />
 
                 <Instructions
@@ -184,12 +180,6 @@ export default function AddOrderForm() {
 
                     <DeliveryTime setTime={setTime} />
                 </div>
-
-                <UploadFiles
-                    handleFileUpload={handleFileUpload}
-                    files={files}
-                    uploadProgress={uploadProgress}
-                />
 
                 <div className="flex justify-center">
                     <Button type="submit" disabled={isLoading || uploading}>

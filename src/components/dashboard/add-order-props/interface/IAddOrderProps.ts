@@ -4,7 +4,6 @@ export interface ISelectServiceAndComplexitiesProps {
     selectedServices: {
         [key: string]: boolean
     }
-    disabled: boolean
 }
 
 export interface IInstructionsProps {

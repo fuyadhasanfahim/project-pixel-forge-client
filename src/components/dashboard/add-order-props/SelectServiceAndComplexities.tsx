@@ -15,31 +15,26 @@ export default function SelectServiceAndComplexities({
     handleServiceChange,
     handleComplexityChange,
     selectedServices,
-    disabled,
 }: ISelectServiceAndComplexitiesProps) {
     return (
-        <div className="flex flex-col" aria-disabled={disabled}>
+        <div className="flex flex-col">
             <h3 className="mb-6 text-lg font-semibold">Select Services</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-5">
                 {servicesData.map((serviceOption) => (
                     <div key={serviceOption.name} className="flex flex-col">
-                        <div
-                            className={`flex items-center gap-2 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
+                        <div className={`flex items-center gap-2`}>
                             <Checkbox
                                 id={serviceOption.name}
                                 checked={Boolean(
                                     selectedServices[serviceOption.name],
                                 )}
                                 onCheckedChange={() =>
-                                    !disabled &&
                                     handleServiceChange(serviceOption.name)
                                 }
-                                disabled={disabled} // Disable checkbox interaction
                             />
                             <label
                                 htmlFor={serviceOption.name}
-                                className={`text-md font-medium text-gray-800 ${disabled ? 'text-gray-500' : ''}`}
+                                className={`text-md font-medium text-gray-800`}
                             >
                                 {serviceOption.name}
                             </label>
@@ -54,7 +49,6 @@ export default function SelectServiceAndComplexities({
                                         )
                                     }
                                     required
-                                    disabled={disabled}
                                 >
                                     <SelectTrigger className="w-full border rounded-md">
                                         <SelectValue placeholder="Select Complexity" />
