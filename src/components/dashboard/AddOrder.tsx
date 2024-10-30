@@ -1,39 +1,19 @@
-import { PlusIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store'
 import IUser from '@/types/userInterface'
 import toast from 'react-hot-toast'
-import { format } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Calendar } from '@/components/ui/calendar'
-
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
-import { TimePicker } from '../TimePicker'
 import {
     usePostOrderMutation,
     useUploadFilesMutation,
 } from '@/features/orders/orderApi'
-import { servicesData, outputFormatOptions } from '@/data/addOrder'
-import { Checkbox } from '../ui/checkbox'
+import SelectServiceAndComplexities from './add-order-props/SelectServiceAndComplexities'
+import Instructions from './add-order-props/Instructions'
+import OutputFormat from './add-order-props/OutputFormat'
+import DeliveryDate from './add-order-props/DeliveryDate'
+import { DeliveryTime } from './add-order-props/DeliveryTime'
+import UploadFiles from './add-order-props/UploadFiles'
 
 export default function AddOrderForm() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -43,8 +23,7 @@ export default function AddOrderForm() {
         Record<string, boolean>
     >({})
     const [complexities, setComplexities] = useState<Record<string, string>>({})
-    const [additionalInstructions, setAdditionalInstructions] =
-        useState<string>('')
+    const [instructions, setInstructions] = useState<string>('')
     const [outputFormat, setOutputFormat] = useState<string>('')
     const [files, setFiles] = useState<File[]>([])
     const [date, setDate] = useState<Date>()
@@ -54,6 +33,8 @@ export default function AddOrderForm() {
     })
     const [deliveryDate, setDeliveryDate] = useState<Date | null>(null)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
+    const [uploading, setUploading] = useState<boolean>(false)
+    const [folderUrl, setFolderUrl] = useState<string>('')
 
     const [uploadFiles] = useUploadFilesMutation()
     const [postOrder, { isLoading }] = usePostOrderMutation()
@@ -67,8 +48,55 @@ export default function AddOrderForm() {
         }
     }, [date, time])
 
-    const handleFileUpload = (files: FileList) => {
-        setFiles(Array.from(files))
+    const handleFileUpload = async (newFiles: File[]) => {
+        const selectedServiceKeys = Object.keys(selectedServices).filter(
+            (service) => selectedServices[service],
+        )
+
+        if (selectedServiceKeys.length === 0) {
+            toast.error(
+                'Please select at least one service before uploading files.',
+            )
+            return
+        }
+
+        setFiles(newFiles)
+        setUploading(true)
+
+        const formData = new FormData()
+        newFiles.forEach((file) => formData.append('images', file))
+        formData.append('username', username)
+        formData.append('services', JSON.stringify(selectedServiceKeys))
+
+        toast
+            .promise(
+                (async () => {
+                    const response = await uploadFiles({
+                        body: formData,
+                        onProgress: setUploadProgress,
+                    }).unwrap()
+
+                    if (response?.folderUrl) {
+                        setFolderUrl(response.folderUrl)
+                        return 'Files uploaded successfully.'
+                    } else {
+                        throw new Error('Failed to upload files.')
+                    }
+                })(),
+                {
+                    loading: 'Uploading files...',
+                    success: () => {
+                        setUploadProgress(0)
+                        return 'Files uploaded successfully.'
+                    },
+                    error: (error) => {
+                        return (error as Error).message
+                    },
+                },
+            )
+            .finally(() => {
+                setUploading(false)
+            })
     }
 
     const handleServiceChange = (serviceName: string) => {
@@ -94,64 +122,39 @@ export default function AddOrderForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!files.length) {
-            toast.error('Please upload at least one file.')
+        if (!folderUrl) {
+            toast.error('Please upload files first.')
             return
         }
 
-        const formData = new FormData()
-        formData.append('username', username)
-        formData.append(
-            'services',
-            JSON.stringify(
-                Object.keys(selectedServices).filter(
-                    (service) => selectedServices[service],
-                ),
+        const orderData = {
+            userId: _id,
+            username,
+            services: Object.keys(selectedServices).filter(
+                (service) => selectedServices[service],
             ),
-        )
+            complexities,
+            instructions,
+            outputFormat,
+            deliveryDate,
+            folderUrl,
+            images: files.length,
+        }
 
-        const complexitiesArray = Object.entries(complexities).map(
-            ([, complexity]) => complexity,
-        )
-
-        formData.append('complexities', JSON.stringify(complexitiesArray))
-        files.forEach((file) => formData.append('images', file))
-
-        toast
-            .promise(
-                (async () => {
-                    const response = await uploadFiles({
-                        body: formData,
-                        onProgress: setUploadProgress,
-                    }).unwrap()
-
-                    if (response?.folderUrl) {
-                        const orderData = {
-                            userId: _id,
-                            username,
-                            services: Object.keys(selectedServices).filter(
-                                (service) => selectedServices[service],
-                            ),
-                            complexities,
-                            additionalInstructions,
-                            outputFormat,
-                            deliveryDate,
-                            folderUrl: response.folderUrl,
-                            images: files.length,
-                        }
-                        await postOrder(orderData).unwrap()
-                    }
-                    return 'Order placed successfully.'
-                })(),
-                {
-                    loading: 'Uploading files...',
-                    success: (message) => message,
-                    error: (error) => (error as Error).message,
-                },
-            )
-            .catch((error) => {
-                toast.error((error as Error).message)
-            })
+        try {
+            await postOrder(orderData).unwrap()
+            toast.success('Order placed successfully.')
+            setFiles([])
+            setSelectedServices({})
+            setComplexities({})
+            setInstructions('')
+            setOutputFormat('')
+            setDeliveryDate(null)
+            setUploadProgress(0)
+            setFolderUrl('')
+        } catch (error) {
+            toast.error((error as Error).message)
+        }
     }
 
     return (
@@ -162,203 +165,37 @@ export default function AddOrderForm() {
                 </h1>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="flex flex-col">
-                    <h3 className="mb-6 text-lg font-semibold">
-                        Select Services
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-5">
-                        {servicesData.map((serviceOption) => (
-                            <div
-                                key={serviceOption.name}
-                                className="flex flex-col"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        id={serviceOption.name}
-                                        checked={Boolean(
-                                            selectedServices[
-                                                serviceOption.name
-                                            ],
-                                        )}
-                                        onCheckedChange={() =>
-                                            handleServiceChange(
-                                                serviceOption.name,
-                                            )
-                                        }
-                                    />
-                                    <label
-                                        htmlFor={serviceOption.name}
-                                        className="text-md font-medium text-gray-800"
-                                    >
-                                        {serviceOption.name}
-                                    </label>
-                                </div>
-                                {selectedServices[serviceOption.name] && (
-                                    <div className="mt-2">
-                                        <Select
-                                            onValueChange={(value) =>
-                                                handleComplexityChange(
-                                                    serviceOption.name,
-                                                    value,
-                                                )
-                                            }
-                                            required
-                                        >
-                                            <SelectTrigger className="w-full border rounded-md">
-                                                <SelectValue placeholder="Select Complexity" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>
-                                                        Complexity
-                                                    </SelectLabel>
-                                                    {serviceOption.complexities.map(
-                                                        (complexityOption) => (
-                                                            <SelectItem
-                                                                key={
-                                                                    complexityOption.label
-                                                                }
-                                                                value={
-                                                                    complexityOption.label
-                                                                }
-                                                            >
-                                                                {
-                                                                    complexityOption.label
-                                                                }
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <SelectServiceAndComplexities
+                    handleServiceChange={handleServiceChange}
+                    handleComplexityChange={handleComplexityChange}
+                    selectedServices={selectedServices}
+                    disabled={uploading}
+                />
 
-                <div className="grid w-full max-w-full space-y-2">
-                    <Label htmlFor="message" className="text-lg">
-                        Additional Instructions
-                    </Label>
-                    <Textarea
-                        id="message"
-                        value={additionalInstructions}
-                        onChange={(e) =>
-                            setAdditionalInstructions(e.target.value)
-                        }
-                        placeholder="Add any details about your order..."
-                        className="resize-none h-32"
-                        required
-                    />
-                </div>
+                <Instructions
+                    instructions={instructions}
+                    setInstructions={setInstructions}
+                />
 
                 <div className="flex items-center flex-wrap gap-5">
-                    <div className="flex flex-col">
-                        <h3 className="mb-3 text-lg">Choose Output Format</h3>
-                        <Select onValueChange={setOutputFormat} required>
-                            <SelectTrigger className="w-[200px]">
-                                <SelectValue placeholder="Select an Image Format" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Image Formats</SelectLabel>
-                                    {outputFormatOptions.map((format) => (
-                                        <SelectItem key={format} value={format}>
-                                            {format}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <OutputFormat setOutputFormat={setOutputFormat} />
 
-                    <div className="flex flex-col">
-                        <h3 className="mb-3 text-lg">Choose Delivery Date</h3>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={'outline'}
-                                    className={cn(
-                                        'w-[280px] justify-start text-left font-normal',
-                                        !date && 'text-muted-foreground',
-                                    )}
-                                >
-                                    <CalendarIcon />
-                                    {date ? (
-                                        format(date, 'PPP')
-                                    ) : (
-                                        <span>Pick a date</span>
-                                    )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    fromDate={new Date()}
-                                    initialFocus
-                                    required
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
+                    <DeliveryDate date={date} setDate={setDate} />
 
-                    <div>
-                        <h3 className="mb-3 text-lg">Choose Delivery Time</h3>
-                        <TimePicker setTime={setTime} />
-                    </div>
+                    <DeliveryTime setTime={setTime} />
                 </div>
 
-                <div className="grid w-full max-w-full space-y-2">
-                    <Label htmlFor="file-upload" className="text-lg">
-                        Upload Image
-                    </Label>
-                    <div className="flex items-center justify-center h-20 border-2 border-dashed rounded-lg border-gray-300">
-                        <label
-                            htmlFor="file"
-                            className="p-6 flex flex-col items-center justify-center cursor-pointer"
-                        >
-                            <PlusIcon className="h-6 w-6" />
-                            <span className="text-sm text-gray-600">
-                                Click to upload
-                            </span>
-                            <Input
-                                type="file"
-                                id="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(e) =>
-                                    handleFileUpload(e.target.files!)
-                                }
-                                className="hidden"
-                                required
-                            />
-                        </label>
-                    </div>
-                    {files.length > 0 && (
-                        <p className="text-sm text-gray-600">
-                            {files.length === 0
-                                ? 'No file selected'
-                                : `${files.length} ${files.length > 1 ? 'files' : 'file'} selected`}
-                        </p>
-                    )}
-
-                    {uploadProgress > 0 && uploadProgress < 100 && (
-                        <div className="w-full bg-gray-200 rounded-full mt-2">
-                            <div
-                                className="bg-green-600 h-2 rounded-full"
-                                style={{ width: `${uploadProgress}%` }}
-                            />
-                        </div>
-                    )}
-                </div>
+                <UploadFiles
+                    handleFileUpload={handleFileUpload}
+                    files={files}
+                    uploadProgress={uploadProgress}
+                />
 
                 <div className="flex justify-center">
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading ? 'Submitting Order...' : 'Submit Order'}
+                    <Button type="submit" disabled={isLoading || uploading}>
+                        {isLoading || uploading
+                            ? 'Submitting Order...'
+                            : 'Submit Order'}
                     </Button>
                 </div>
             </form>
