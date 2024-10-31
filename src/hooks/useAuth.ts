@@ -4,14 +4,14 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function useAuth() {
-    const auth = useSelector((state: RootState) => state.auth)
+    const { user } = useSelector((state: RootState) => state.auth)
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (!auth.user) {
+        if (!user) {
             navigate('/auth')
         }
-    }, [auth.user, navigate])
+    }, [user, navigate])
 
-    return !!auth.user
+    return !!user
 }

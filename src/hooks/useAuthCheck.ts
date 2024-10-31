@@ -10,19 +10,22 @@ export default function useAuthCheck() {
     const [authChecked, setAuthChecked] = useState(false)
     const token = Cookies.get('accessToken')
 
-    const { data, isLoading } = useFetchCurrentUserQuery(token)
+    const { data, isLoading, isError } = useFetchCurrentUserQuery(token, {
+        skip: !token,
+    })
 
     useEffect(() => {
-        if (data?.user && token) {
-            dispatch(
-                userLoggedIn({
-                    user: data.user,
-                }),
-            )
+        if (!isLoading && !isError) {
+            if (data?.user && token) {
+                dispatch(
+                    userLoggedIn({
+                        user: data.user,
+                    }),
+                )
+            }
+            setAuthChecked(true)
         }
-
-        setAuthChecked(!isLoading)
-    }, [data, dispatch, isLoading, token])
+    }, [data, dispatch, isLoading, isError, token])
 
     return authChecked
 }
