@@ -8,8 +8,68 @@ import ExpenseHead from './expense-props/create-expense/ExpenseHead'
 import Reference from './expense-props/create-expense/Reference'
 import Amount from './expense-props/create-expense/Amount'
 import { Textarea } from '@/components/ui/textarea'
+import { useEffect, useState } from 'react'
+import {
+    useCreateExpenseMutation,
+    useGetExpenseHeadQuery,
+} from '@/features/expense/expenseApi'
+import toast from 'react-hot-toast'
+import moment from 'moment'
+
+function generateExpenseNumber() {
+    return `EXP-${moment().format('DDMMYYYYhhmm')}`
+}
 
 export default function CreateExpense() {
+    const [createExpense, { isLoading }] = useCreateExpenseMutation()
+    const { data, isLoading: isFetching } = useGetExpenseHeadQuery([])
+    const { expenses } = data || []
+
+    useEffect(() => {
+        setExpenseNo(generateExpenseNumber())
+    }, [])
+
+    const [expenseNo, setExpenseNo] = useState(generateExpenseNumber())
+    const [date, setDate] = useState<Date>()
+    const [creditType, setCreditType] = useState('')
+    const [notes, setNotes] = useState('')
+    const [amount, setAmount] = useState('')
+    const [reference, setReference] = useState('')
+    const [expenseHead, setExpenseHead] = useState('')
+
+    if (isFetching) {
+        return <div>Loading...</div>
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formData = {
+            expenseNumber: expenseNo,
+            date,
+            credit: creditType,
+            notes,
+            amount,
+            reference,
+            expenseHead,
+        }
+
+        try {
+            console.log(formData)
+            await createExpense(formData).unwrap()
+
+            toast.success('Expense created successfully')
+            setExpenseNo(generateExpenseNumber())
+            setCreditType('')
+            setNotes('')
+            setAmount('')
+            setReference('')
+            setExpenseHead('')
+        } catch (error) {
+            console.log(error)
+            toast.error((error as Error).message || 'Error creating expense')
+        }
+    }
+
     return (
         <div className="m-4 h-screen max-h-full flex flex-col items-center">
             <h1 className="text-3xl font-semibold mb-8 text-center text-gray-800">
@@ -17,6 +77,7 @@ export default function CreateExpense() {
             </h1>
 
             <form
+                onSubmit={handleSubmit}
                 action=""
                 className="w-full max-w-4xl border rounded-lg shadow-lg p-8 bg-white"
             >
@@ -48,19 +109,25 @@ export default function CreateExpense() {
                                 type="text"
                                 name="expense-no"
                                 placeholder="Enter Expense No."
+                                value={expenseNo}
+                                onChange={(e) => setExpenseNo(e.target.value)}
                                 required
+                                readOnly
                                 className="py-2 px-4 border border-gray-300 rounded-lg focus:ring focus:ring-primary focus:border-primary"
                             />
                         </div>
 
-                        <PicDate />
+                        <PicDate date={date} setDate={setDate} />
                     </div>
 
                     <div className="flex items-center gap-5">
-                        <SelectCredit />
-                        <ExpenseHead />
-                        <Reference />
-                        <Amount />
+                        <SelectCredit setCreditType={setCreditType} />
+                        <ExpenseHead
+                            setExpenseHead={setExpenseHead}
+                            expenses={expenses}
+                        />
+                        <Reference setReference={setReference} />
+                        <Amount amount={amount} setAmount={setAmount} />
                     </div>
                 </div>
 
@@ -71,6 +138,8 @@ export default function CreateExpense() {
                     <Textarea
                         id="note"
                         name="note"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
                         placeholder="Note..."
                         required
                         className="py-2 px-4 border border-gray-300 rounded-lg focus:ring focus:ring-primary focus:border-primary"
@@ -81,6 +150,7 @@ export default function CreateExpense() {
                     <Button
                         type="submit"
                         variant={'default'}
+                        disabled={isLoading}
                         className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all duration-300"
                     >
                         Submit Expense

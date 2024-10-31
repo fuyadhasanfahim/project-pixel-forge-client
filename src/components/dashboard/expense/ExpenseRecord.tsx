@@ -16,9 +16,46 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination'
-import { Trash2Icon } from 'lucide-react'
+import { Edit2Icon, Trash2Icon } from 'lucide-react'
+import {
+    useDeleteExpenseMutation,
+    useGetExpensesQuery,
+    // useUpdateExpenseMutation,
+} from '@/features/expense/expenseApi'
+import { ICreateExpense } from '@/types/expense.interface'
+import { format } from 'date-fns'
+import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 export default function ExpenseRecord() {
+    const { data, isLoading } = useGetExpensesQuery([])
+    const expenses = (data?.expenses as ICreateExpense[]) || []
+    const [deleteExpense] = useDeleteExpenseMutation()
+    // const [updateExpense] = useUpdateExpenseMutation()
+
+    const handleDelete = async (expenseNumber: string) => {
+        if (confirm('Are you sure you want to delete this expense?')) {
+            try {
+                await deleteExpense(expenseNumber).unwrap()
+                toast.success('Expense deleted successfully')
+            } catch (error) {
+                toast.error((error as Error).message)
+            }
+        }
+    }
+
+    // const handleUpdate = async () => {
+    //     try {
+    //         const updatedExpense = await updateExpense({
+    //             expenseId: 'your-expense-id',
+    //             data: {},
+    //         }).unwrap()
+    //         console.log('Expense updated successfully:', updatedExpense)
+    //     } catch (error) {
+    //         console.error('Failed to update expense:', error)
+    //     }
+    // }
+
     return (
         <div className="m-4 h-screen max-h-full">
             <h1 className="text-2xl mb-6">Expenses List</h1>
@@ -51,30 +88,60 @@ export default function ExpenseRecord() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow key={1}>
-                            <TableCell className="border border-black">
-                                1
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                31 Oct 2024
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                EXP-B0-311024-001
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                $ 2,555.00
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                31 Oct 2024 09:51 AM
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                Lorem ipsum dolor sit amet consectetur
-                                adipisicing elit. Consectetur...
-                            </TableCell>
-                            <TableCell className="border border-black">
-                                <Trash2Icon className="h-5 w-5" />
-                            </TableCell>
-                        </TableRow>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center">
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            expenses.map((expense, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="border border-black">
+                                        {index + 1}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        {format(
+                                            new Date(expense.date),
+                                            'dd MMM yyyy',
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        {expense.expenseNumber}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        ${expense.amount}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        {format(
+                                            new Date(expense.createdAt),
+                                            'dd MMM yyyy hh:mm a',
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        {expense.notes}
+                                    </TableCell>
+                                    <TableCell className="border border-black">
+                                        <div className="flex items-center gap-2">
+                                            <Trash2Icon
+                                                className="h-5 w-5 cursor-pointer"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        expense.expenseNumber,
+                                                    )
+                                                }
+                                            />
+                                            <Edit2Icon
+                                                className="h-5 w-5 cursor-pointer"
+                                                // onClick={() =>
+                                                //     handleUpdate(expense._id)
+                                                // }
+                                            />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
 
@@ -104,7 +171,11 @@ export default function ExpenseRecord() {
                 </Pagination>
 
                 <div className="flex w-full items-center justify-end">
-                    <Button>Add Expense</Button>
+                    <Button>
+                        <Link to={'/dashboard/create-expense'}>
+                            Add Expense
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </div>

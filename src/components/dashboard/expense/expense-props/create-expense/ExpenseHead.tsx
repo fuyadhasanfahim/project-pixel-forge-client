@@ -6,23 +6,30 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { IAddExpenseHead } from '@/types/expense.interface'
 
-export default function ExpenseHead() {
+export default function ExpenseHead({
+    setExpenseHead,
+    expenses,
+}: {
+    setExpenseHead: (value: string) => void
+    expenses: IAddExpenseHead[]
+}) {
     return (
         <div className="w-full">
             <Label htmlFor="credit-type" className="mb-2 text-gray-700">
                 Expenses Head
             </Label>
-            <Select>
+            <Select onValueChange={setExpenseHead}>
                 <SelectTrigger id="credit-type" className="w-full">
                     <SelectValue placeholder="Select credit type" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Petty Cash">Petty Cash</SelectItem>
-                    <SelectItem value="Cash">Cash</SelectItem>
-                    <SelectItem value="Loan Dutch Bangla Bank">
-                        Loan Dutch Bangla Bank
-                    </SelectItem>
+                    {expenses.map((expense, index) => (
+                        <SelectItem key={index} value={expense?.name}>
+                            {expense?.name}
+                        </SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
         </div>

@@ -9,11 +9,14 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
 
-export default function PicDate() {
-    const [date, setDate] = useState<Date>()
-
+export default function PicDate({
+    date,
+    setDate,
+}: {
+    date: Date | undefined
+    setDate: (date: Date | undefined) => void
+}) {
     return (
         <div className="w-full">
             <Label htmlFor="date" className="block mb-2 text-gray-700">
@@ -40,7 +43,9 @@ export default function PicDate() {
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={(selectedDate) => {
+                            setDate(selectedDate ?? undefined)
+                        }}
                         initialFocus
                         fromDate={new Date()}
                     />
