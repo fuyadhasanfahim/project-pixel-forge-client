@@ -19,6 +19,10 @@ import FloatingChat from './pages/FloatingMessageButton/FloatingMessageButton'
 import { useSelector } from 'react-redux'
 import { RootState } from './app/store'
 import IUser from './types/userInterface'
+import AddExpensesHeadPage from './pages/dashboard/expense-page/AddExpensesHead'
+import CreateExpensePage from './pages/dashboard/expense-page/CreateExpensePage'
+import ExpenseRecordPage from './pages/dashboard/expense-page/ExpenseRecordPage'
+import ExpensesHeadPage from './pages/dashboard/expense-page/ExpensesHeadPage'
 
 export default function App() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -130,6 +134,38 @@ export default function App() {
                     element={
                         <PrivateRoute>
                             <InboxPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/expenses-head"
+                    element={
+                        <PrivateRoute>
+                            <ExpensesHeadPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/expense-record"
+                    element={
+                        <PrivateRoute>
+                            <ExpenseRecordPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/create-expense"
+                    element={
+                        <PrivateRoute>
+                            <CreateExpensePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/add-expenses-head"
+                    element={
+                        <PrivateRoute>
+                            <AddExpensesHeadPage />
                         </PrivateRoute>
                     }
                 />

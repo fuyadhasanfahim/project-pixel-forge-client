@@ -1,0 +1,91 @@
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+
+export default function AddExpenseHead() {
+    return (
+        <div className="flex items-center justify-center py-8 h-screen bg-gray-50">
+            <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
+                <h1 className="text-3xl font-semibold mb-8 text-center text-primary">
+                    Add Expense Head
+                </h1>
+
+                <form action="" className="space-y-6">
+                    <div>
+                        <Label
+                            htmlFor="name"
+                            className="text-gray-700 font-medium"
+                        >
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            type="text"
+                            name="name"
+                            placeholder="Enter expense name"
+                            required
+                            className="mt-1 w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <Label
+                            htmlFor="credit-type"
+                            className="text-gray-700 font-medium"
+                        >
+                            Credit Type
+                        </Label>
+                        <Select>
+                            <SelectTrigger
+                                id="credit-type"
+                                className="w-full mt-1"
+                            >
+                                <SelectValue placeholder="Select credit type" />
+                            </SelectTrigger>
+                            <SelectContent className="z-10">
+                                <SelectItem value="Petty Cash">
+                                    Administrative Expense
+                                </SelectItem>
+                                <SelectItem value="Cash">
+                                    Operating Expense
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label
+                            htmlFor="description"
+                            className="text-gray-700 font-medium"
+                        >
+                            Description
+                        </Label>
+                        <Textarea
+                            id="description"
+                            name="description"
+                            placeholder="Add a description..."
+                            required
+                            className="mt-1 w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                        />
+                    </div>
+
+                    <div className="text-center mt-8">
+                        <button
+                            type="submit"
+                            className="w-full bg-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-200"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}

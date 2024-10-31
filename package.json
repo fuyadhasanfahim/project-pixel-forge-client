@@ -8,7 +8,8 @@
         "build": "tsc -b && vite build",
         "lint": "eslint .",
         "preview": "vite preview",
-        "prettier": "npx prettier . --write"
+        "prettier": "npx prettier . --write",
+        "serve": "vite preview"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.9.0",
