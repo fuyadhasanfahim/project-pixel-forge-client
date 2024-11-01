@@ -6,7 +6,7 @@ import IUser from '@/types/userInterface'
 import toast from 'react-hot-toast'
 import {
     usePostOrderMutation,
-    useUploadFilesMutation,
+    // useUploadFilesMutation,
 } from '@/features/orders/orderApi'
 import SelectServiceAndComplexities from './add-order-props/SelectServiceAndComplexities'
 import Instructions from './add-order-props/Instructions'
@@ -14,10 +14,11 @@ import OutputFormat from './add-order-props/OutputFormat'
 import DeliveryDate from './add-order-props/DeliveryDate'
 import { DeliveryTime } from './add-order-props/DeliveryTime'
 import UploadFiles from './add-order-props/UploadFiles'
+import Inputs from './add-order-props/Inputs'
 
 export default function AddOrderForm() {
     const { user } = useSelector((state: RootState) => state.auth)
-    const { _id, username } = user as IUser
+    const { _id, username, name, email, profileImage } = user as IUser
 
     const [selectedServices, setSelectedServices] = useState<
         Record<string, boolean>
@@ -33,11 +34,15 @@ export default function AddOrderForm() {
     })
     const [deliveryDate, setDeliveryDate] = useState<Date | null>(null)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
-    const [uploading, setUploading] = useState<boolean>(false)
-    const [folderUrl, setFolderUrl] = useState<string>('')
-    const [imageUrls, setImageUrls] = useState<string[]>([])
+    // const [uploading, setUploading] = useState<boolean>(false)
+    // const [folderUrl, setFolderUrl] = useState<string>('')
+    const [imagesLink, setImagesLink] = useState<string>('')
+    const [images, setImages] = useState<string>('')
+    const [pricePerImage, setPricePerImage] = useState<string>('')
+    const [totalBudget, setTotalBudget] = useState<string>('')
+    const [totalPrice, setTotalPrice] = useState<string>('')
 
-    const [uploadFiles] = useUploadFilesMutation()
+    // const [uploadFiles] = useUploadFilesMutation()
     const [postOrder, { isLoading }] = usePostOrderMutation()
 
     useEffect(() => {
@@ -49,45 +54,60 @@ export default function AddOrderForm() {
         }
     }, [date, time])
 
-    const handleFileUpload = async (newFiles: File[]) => {
-        setFiles(newFiles)
-        setUploading(true)
+    useEffect(() => {
+        const price = Number(pricePerImage)
+        const imageCount = Number(images)
+        const budget = parseFloat(totalBudget)
 
-        const formData = new FormData()
-        formData.append('username', username)
-        newFiles.forEach((file) => formData.append('images', file))
+        if (budget > 0) {
+            setTotalPrice(budget.toString())
+        } else if (price > 0 && Number(imageCount) > 0) {
+            setTotalPrice((price * imageCount).toString())
+        } else {
+            setTotalPrice('')
+        }
+    }, [pricePerImage, images, totalBudget])
 
-        toast
-            .promise(
-                (async () => {
-                    const response = await uploadFiles({
-                        body: formData,
-                        onProgress: setUploadProgress,
-                    }).unwrap()
+    // const handleFileUpload = async (newFiles: File[]) => {
+    //     if (!newFiles.length) return
 
-                    if (response?.folderUrl && response?.imageUrls) {
-                        setFolderUrl(response.folderUrl)
-                        setImageUrls(response?.imageUrls)
-                        return 'Files uploaded successfully.'
-                    } else {
-                        throw new Error('Failed to upload files.')
-                    }
-                })(),
-                {
-                    loading: 'Uploading files...',
-                    success: () => {
-                        setUploadProgress(0)
-                        return 'Files uploaded successfully.'
-                    },
-                    error: (error) => {
-                        return (error as Error).message
-                    },
-                },
-            )
-            .finally(() => {
-                setUploading(false)
-            })
-    }
+    //     setFiles(newFiles)
+    //     setUploading(true)
+
+    //     const formData = new FormData()
+    //     formData.append('username', username)
+    //     newFiles.forEach((file) => formData.append('images', file))
+
+    //     toast
+    //         .promise(
+    //             (async () => {
+    //                 const response = await uploadFiles({
+    //                     body: formData,
+    //                     onProgress: setUploadProgress,
+    //                 }).unwrap()
+
+    //                 if (response?.folderUrl) {
+    //                     setFolderUrl(response.folderUrl)
+    //                     return 'Files uploaded successfully.'
+    //                 } else {
+    //                     throw new Error('Failed to upload files.')
+    //                 }
+    //             })(),
+    //             {
+    //                 loading: 'Uploading files...',
+    //                 success: () => {
+    //                     setUploadProgress(0)
+    //                     return 'Files uploaded successfully.'
+    //                 },
+    //                 error: (error) => {
+    //                     return (error as Error).message
+    //                 },
+    //             },
+    //         )
+    //         .finally(() => {
+    //             setUploading(false)
+    //         })
+    // }
 
     const handleServiceChange = (serviceName: string) => {
         setSelectedServices((prev) => ({
@@ -112,14 +132,12 @@ export default function AddOrderForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!folderUrl) {
-            toast.error('Please upload files first.')
-            return
-        }
-
         const orderData = {
             userId: _id,
             username,
+            name,
+            email,
+            profileImage,
             services: Object.keys(selectedServices).filter(
                 (service) => selectedServices[service],
             ),
@@ -127,9 +145,11 @@ export default function AddOrderForm() {
             instructions,
             outputFormat,
             deliveryDate,
-            folderUrl,
-            images: files.length,
-            imageUrls,
+            imagesLink,
+            images,
+            pricePerImage,
+            totalBudget,
+            totalPrice,
         }
 
         try {
@@ -142,7 +162,7 @@ export default function AddOrderForm() {
             setOutputFormat('')
             setDeliveryDate(null)
             setUploadProgress(0)
-            setFolderUrl('')
+            // setFolderUrl('')
         } catch (error) {
             toast.error((error as Error).message)
         }
@@ -157,10 +177,9 @@ export default function AddOrderForm() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <UploadFiles
-                    handleFileUpload={handleFileUpload}
+                    // handleFileUpload={handleFileUpload}
                     files={files}
                     uploadProgress={uploadProgress}
-                    imageUrls={imageUrls}
                 />
 
                 <SelectServiceAndComplexities
@@ -174,6 +193,54 @@ export default function AddOrderForm() {
                     setInstructions={setInstructions}
                 />
 
+                <div className="flex items-center flex-wrap gap-5 w-full">
+                    <Inputs
+                        type={'text'}
+                        id={'imageLinks'}
+                        placeholder={'Enter Image Links'}
+                        readOnly={false}
+                        label={'Image Link'}
+                        value={imagesLink}
+                        setValue={setImagesLink}
+                    />
+                    <Inputs
+                        type={'number'}
+                        id={'images'}
+                        placeholder={'Enter total images'}
+                        readOnly={false}
+                        label={'Images'}
+                        value={images}
+                        setValue={setImages}
+                    />
+                    <Inputs
+                        type={'number'}
+                        id={'price-per-image'}
+                        placeholder={'Enter per image price (Optional)'}
+                        readOnly={false}
+                        label={'Price per image'}
+                        value={pricePerImage}
+                        setValue={setPricePerImage}
+                    />
+                    <Inputs
+                        type={'number'}
+                        id={'total-budget'}
+                        placeholder={'Enter total budget'}
+                        readOnly={false}
+                        label={'Total budget'}
+                        value={totalBudget}
+                        setValue={setTotalBudget}
+                    />
+                    <Inputs
+                        type={'number'}
+                        id={'total-price'}
+                        placeholder={'Your total price'}
+                        readOnly={true}
+                        label={'Total price'}
+                        value={totalPrice}
+                        setValue={setTotalPrice}
+                    />
+                </div>
+
                 <div className="flex items-center flex-wrap gap-5">
                     <OutputFormat setOutputFormat={setOutputFormat} />
 
@@ -183,10 +250,8 @@ export default function AddOrderForm() {
                 </div>
 
                 <div className="flex justify-center">
-                    <Button type="submit" disabled={isLoading || uploading}>
-                        {isLoading || uploading
-                            ? 'Submitting Order...'
-                            : 'Submit Order'}
+                    <Button type="submit" disabled={isLoading}>
+                        {isLoading ? 'Submitting Order...' : 'Submit Order'}
                     </Button>
                 </div>
             </form>

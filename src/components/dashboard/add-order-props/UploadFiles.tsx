@@ -1,17 +1,12 @@
 import { Input } from '@/components/ui/input'
-import { PlusIcon, Trash2Icon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { IUploadFilesProps } from './interface/IAddOrderProps'
-import { Button } from '@/components/ui/button'
-import ImagePopOver from './ImagePopOver'
 
 export default function UploadFiles({
-    handleFileUpload,
+    // handleFileUpload,
     files,
     uploadProgress,
-    imageUrls,
 }: IUploadFilesProps) {
-    // const [popoverOpen, setPopoverOpen] = useState(false)
-
     return (
         <div className="grid w-full max-w-full space-y-2">
             <h3 className="mb-6 text-lg font-semibold">Upload Image</h3>
@@ -30,34 +25,14 @@ export default function UploadFiles({
                             id="file"
                             accept="image/*"
                             multiple
-                            onChange={(e) =>
-                                handleFileUpload(
-                                    Array.from(e.target.files || []),
-                                )
-                            }
+                            // onChange={(e) =>
+                            //     handleFileUpload(
+                            //         Array.from(e.target.files || []),
+                            //     )
+                            // }
                             className="hidden"
-                            required
                         />
                     </label>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4  xl:grid-cols-5 gap-x-4 mt-4 w-full max-w-xl">
-                    {imageUrls.slice(0, 5).map((imageUrl, index) => (
-                        <div key={index} className="relative group w-20">
-                            <img
-                                src={imageUrl}
-                                alt={`Image ${index + 1}`}
-                                className="w-20 h-20 rounded-lg object-cover transition-transform transform group-hover:scale-105"
-                            />
-                            <Button
-                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                variant={'outline'}
-                                type="button"
-                            >
-                                <Trash2Icon />
-                            </Button>
-                        </div>
-                    ))}
                 </div>
             </div>
 
@@ -78,8 +53,6 @@ export default function UploadFiles({
                     />
                 </div>
             )}
-
-            <ImagePopOver imageUrls={imageUrls} />
         </div>
     )
 }

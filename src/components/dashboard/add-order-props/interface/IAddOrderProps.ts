@@ -25,8 +25,7 @@ export interface TimePickerProps {
 }
 
 export interface IUploadFilesProps {
-    handleFileUpload: (files: File[]) => void
+    // handleFileUpload: (files: File[]) => void
     files: File[]
     uploadProgress: number
-    imageUrls: string[]
 }

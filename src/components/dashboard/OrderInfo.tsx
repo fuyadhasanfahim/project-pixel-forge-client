@@ -6,15 +6,13 @@ import { useParams } from 'react-router-dom'
 import { Alert } from '../ui/alert'
 import { useFetchUserByIdQuery } from '@/features/auth/authApi'
 import { Button } from '../ui/button'
-import { useRef, useState } from 'react'
+import { Key, useRef, useState } from 'react'
 import { Textarea } from '../ui/textarea'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store'
 import { toast } from 'react-hot-toast'
 import { FolderUp } from 'lucide-react'
 import IUser from '@/types/userInterface'
-import { servicesData } from '@/data/addOrder'
-import IOrders from '@/types/orderInterface'
 
 export default function OrderInfo() {
     const { user: loggedInUser } = useSelector((state: RootState) => state.auth)
@@ -78,34 +76,6 @@ export default function OrderInfo() {
                 <p>Failed to load order details. Please try again later.</p>
             </Alert>
         )
-    }
-
-    const calculateOrderPrice = (order: IOrders) => {
-        const totalServicePrice = order.services.reduce((total, service) => {
-            const foundService = servicesData.find((s) => s.name === service)
-
-            if (foundService) {
-                const complexity = order.complexities[service]
-                if (complexity) {
-                    const complexityData = foundService.complexities.find((c) =>
-                        c.label.includes(complexity),
-                    )
-
-                    if (complexityData) {
-                        const priceMatch = complexityData.label.match(/\d+/)
-                        const complexityPrice = priceMatch
-                            ? parseInt(priceMatch[0])
-                            : 0
-
-                        return total + complexityPrice
-                    }
-                }
-            }
-
-            return total
-        }, 0)
-
-        return totalServicePrice * Number(order.images)
     }
 
     return (
@@ -226,9 +196,20 @@ export default function OrderInfo() {
                         <div>
                             <strong>Images:</strong> {order?.images}
                         </div>
+                        {order?.totalBudget && (
+                            <div>
+                                <strong>Total budget:</strong> $
+                                {order?.totalBudget}
+                            </div>
+                        )}
+                        {order?.pricePerImage && (
+                            <div>
+                                <strong>Price per image:</strong> $
+                                {order?.pricePerImage}
+                            </div>
+                        )}
                         <div>
-                            <strong>Price:</strong> $
-                            {calculateOrderPrice(order)}
+                            <strong>Total Price:</strong> ${order?.totalPrice}
                         </div>
                         <div>
                             <strong>Payment Status:</strong>{' '}
@@ -250,10 +231,14 @@ export default function OrderInfo() {
                             {order?.outputFormat}
                         </div>
                         <div>
-                            <strong>Services:</strong>{' '}
-                            {order?.services.length > 0
-                                ? order.services.join(', ')
-                                : 'No services available'}
+                            <strong>Services:</strong>
+                            <ul className="ml-6 list-disc">
+                                {order.services.map(
+                                    (service: string, index: Key) => (
+                                        <li key={index}>{service}</li>
+                                    ),
+                                )}
+                            </ul>
                         </div>
                         <div>
                             <strong>Complexities:</strong>

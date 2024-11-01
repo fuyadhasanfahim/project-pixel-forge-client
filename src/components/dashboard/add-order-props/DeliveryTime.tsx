@@ -24,7 +24,9 @@ export const DeliveryTime: React.FC<TimePickerProps> = ({ setTime }) => {
 
     return (
         <div>
-            <h3 className="mb-3 text-lg">Choose Delivery Time</h3>
+            <h3 className="mb-3 text-lg">
+                Choose Delivery Time (International Formate)
+            </h3>
             <div className="flex items-center gap-x-5">
                 <Select value={selectedHour} onValueChange={setSelectedHour}>
                     <SelectTrigger className="w-16">

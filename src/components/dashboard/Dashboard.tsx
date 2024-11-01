@@ -76,29 +76,33 @@ export default function Dashboard() {
                 key={index}
                 className={` ${getStatusColor(order.status)}`}
             >
-                <TableCell>
+                <TableCell className="border border-black">
                     {new Date(order.deliveryDate).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="font-medium">{order._id}</TableCell>
-                <TableCell>{order.username}</TableCell>
-                <TableCell>
+                <TableCell className="font-medium border border-black">
+                    {order._id}
+                </TableCell>
+                <TableCell className="border border-black">
+                    {order.username}
+                </TableCell>
+                <TableCell className="border border-black">
                     {order?.services?.length > 0
                         ? order.services.join(', ')
                         : 'No services available'}{' '}
                 </TableCell>
-                <TableCell>1000</TableCell>
-                <TableCell>$ 150</TableCell>
-                <TableCell>
+                <TableCell className="border border-black">1000</TableCell>
+                <TableCell className="border border-black">$ 150</TableCell>
+                <TableCell className="border border-black">
                     <span className={`font-semibold uppercase`}>
                         {order.status}
                     </span>
                 </TableCell>
                 {showPaymentStatus && (
-                    <TableCell className="uppercase">
+                    <TableCell className="uppercase border border-black">
                         {renderPaymentStatus(order)}
                     </TableCell>
                 )}
-                <TableCell>
+                <TableCell className="border border-black">
                     <button
                         className="underline"
                         onClick={() =>
