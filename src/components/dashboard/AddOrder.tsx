@@ -4,10 +4,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store'
 import IUser from '@/types/userInterface'
 import toast from 'react-hot-toast'
-import {
-    usePostOrderMutation,
-    // useUploadFilesMutation,
-} from '@/features/orders/orderApi'
+import { usePostOrderMutation } from '@/features/orders/orderApi'
 import SelectServiceAndComplexities from './add-order-props/SelectServiceAndComplexities'
 import Instructions from './add-order-props/Instructions'
 import OutputFormat from './add-order-props/OutputFormat'
@@ -22,34 +19,17 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import Inputs from './add-order-props/Inputs'
-import ICustomerFormData from '@/types/customerInterface'
 import { Label } from '../ui/label'
+import { useGetCustomersQuery } from '@/features/customer/customerApi'
+import ICustomerFormData from '@/types/customerInterface'
 
 export default function AddOrderForm() {
-    const [customers, setCustomers] = useState<ICustomerFormData[]>([])
-
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            try {
-                const response = await fetch(
-                    'http://localhost:5000/api/v1/customers/get-customers',
-                )
-                const result = await response.json()
-
-                if (!response.ok) {
-                    throw new Error(
-                        result.message || 'Failed to fetch customers',
-                    )
-                }
-
-                setCustomers(result.customers)
-            } catch (err) {
-                toast.error((err as Error).message) // Show error toast
-            }
-        }
-
-        fetchCustomers()
-    }, [])
+    const {
+        data,
+        isLoading: customersLoading,
+        error,
+    } = useGetCustomersQuery([])
+    const customers = (data?.customers as ICustomerFormData[]) || []
 
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id, username, name, email, profileImage } = user as IUser
@@ -68,15 +48,13 @@ export default function AddOrderForm() {
     })
     const [deliveryDate, setDeliveryDate] = useState<Date | null>(null)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
-    // const [uploading, setUploading] = useState<boolean>(false)
-    // const [folderUrl, setFolderUrl] = useState<string>('')
     const [imagesLink, setImagesLink] = useState<string>('')
     const [images, setImages] = useState<string>('')
     const [pricePerImage, setPricePerImage] = useState<string>('')
     const [totalBudget, setTotalBudget] = useState<string>('')
     const [totalPrice, setTotalPrice] = useState<string>('')
+    const [customerId, setCustomerId] = useState<string>('')
 
-    // const [uploadFiles] = useUploadFilesMutation()
     const [postOrder, { isLoading }] = usePostOrderMutation()
 
     useEffect(() => {
@@ -101,47 +79,6 @@ export default function AddOrderForm() {
             setTotalPrice('')
         }
     }, [pricePerImage, images, totalBudget])
-
-    // const handleFileUpload = async (newFiles: File[]) => {
-    //     if (!newFiles.length) return
-
-    //     setFiles(newFiles)
-    //     setUploading(true)
-
-    //     const formData = new FormData()
-    //     formData.append('username', username)
-    //     newFiles.forEach((file) => formData.append('images', file))
-
-    //     toast
-    //         .promise(
-    //             (async () => {
-    //                 const response = await uploadFiles({
-    //                     body: formData,
-    //                     onProgress: setUploadProgress,
-    //                 }).unwrap()
-
-    //                 if (response?.folderUrl) {
-    //                     setFolderUrl(response.folderUrl)
-    //                     return 'Files uploaded successfully.'
-    //                 } else {
-    //                     throw new Error('Failed to upload files.')
-    //                 }
-    //             })(),
-    //             {
-    //                 loading: 'Uploading files...',
-    //                 success: () => {
-    //                     setUploadProgress(0)
-    //                     return 'Files uploaded successfully.'
-    //                 },
-    //                 error: (error) => {
-    //                     return (error as Error).message
-    //                 },
-    //             },
-    //         )
-    //         .finally(() => {
-    //             setUploading(false)
-    //         })
-    // }
 
     const handleServiceChange = (serviceName: string) => {
         setSelectedServices((prev) => ({
@@ -184,6 +121,7 @@ export default function AddOrderForm() {
             pricePerImage,
             totalBudget,
             totalPrice,
+            customerId,
         }
 
         try {
@@ -196,7 +134,6 @@ export default function AddOrderForm() {
             setOutputFormat('')
             setDeliveryDate(null)
             setUploadProgress(0)
-            // setFolderUrl('')
         } catch (error) {
             toast.error((error as Error).message)
         }
@@ -210,11 +147,7 @@ export default function AddOrderForm() {
                 </h1>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
-                <UploadFiles
-                    // handleFileUpload={handleFileUpload}
-                    files={files}
-                    uploadProgress={uploadProgress}
-                />
+                <UploadFiles files={files} uploadProgress={uploadProgress} />
 
                 <SelectServiceAndComplexities
                     handleServiceChange={handleServiceChange}
@@ -246,24 +179,34 @@ export default function AddOrderForm() {
                         value={images}
                         setValue={setImages}
                     />
-                    <Inputs
-                        type={'number'}
-                        id={'price-per-image'}
-                        placeholder={'Enter per image price (Optional)'}
-                        readOnly={false}
-                        label={'Price per image'}
-                        value={pricePerImage}
-                        setValue={setPricePerImage}
-                    />
-                    <Inputs
-                        type={'number'}
-                        id={'total-budget'}
-                        placeholder={'Enter total budget'}
-                        readOnly={false}
-                        label={'Total budget'}
-                        value={totalBudget}
-                        setValue={setTotalBudget}
-                    />
+                    {!totalBudget && (
+                        <Inputs
+                            type={'number'}
+                            id={'price-per-image'}
+                            placeholder={'Enter per image price (Optional)'}
+                            readOnly={false}
+                            label={'Price per image'}
+                            value={pricePerImage}
+                            setValue={(value: string) => {
+                                setPricePerImage(value)
+                                if (value) setTotalBudget('')
+                            }}
+                        />
+                    )}
+                    {!pricePerImage && (
+                        <Inputs
+                            type={'number'}
+                            id={'total-budget'}
+                            placeholder={'Enter total budget'}
+                            readOnly={false}
+                            label={'Total budget'}
+                            value={totalBudget}
+                            setValue={(value: string) => {
+                                setTotalBudget(value)
+                                if (value) setPricePerImage('')
+                            }}
+                        />
+                    )}
                     <Inputs
                         type={'number'}
                         id={'total-price'}
@@ -281,12 +224,20 @@ export default function AddOrderForm() {
                         >
                             Customer ID
                         </Label>
-                        <Select>
+                        <Select onValueChange={(value) => setCustomerId(value)}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Select Customer ID" />
                             </SelectTrigger>
                             <SelectContent id="customerSelect">
-                                {customers.length > 0 ? (
+                                {customersLoading ? (
+                                    <SelectItem value="loading" disabled>
+                                        Loading customers...
+                                    </SelectItem>
+                                ) : error ? (
+                                    <SelectItem value="error" disabled>
+                                        Error fetching customers
+                                    </SelectItem>
+                                ) : customers.length > 0 ? (
                                     customers.map((customer) => (
                                         <SelectItem
                                             key={customer.customerId}
@@ -296,7 +247,7 @@ export default function AddOrderForm() {
                                         </SelectItem>
                                     ))
                                 ) : (
-                                    <SelectItem value="" disabled>
+                                    <SelectItem value="no-customers" disabled>
                                         No customers found
                                     </SelectItem>
                                 )}
@@ -307,9 +258,7 @@ export default function AddOrderForm() {
 
                 <div className="flex items-center flex-wrap gap-5">
                     <OutputFormat setOutputFormat={setOutputFormat} />
-
                     <DeliveryDate date={date} setDate={setDate} />
-
                     <DeliveryTime setTime={setTime} />
                 </div>
 

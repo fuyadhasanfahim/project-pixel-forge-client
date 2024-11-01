@@ -1,65 +1,36 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState, FormEvent } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
-
-interface CustomerFormData {
-    customerId: string
-    customerName: string
-    customerEmail: string
-    customerAddress: string
-}
+import { useCreateCustomerMutation } from '@/features/customer/customerApi'
 
 export default function CreateCustomer() {
+    const [createCustomer, { isLoading }] = useCreateCustomerMutation()
+    const [customerId, setCustomerId] = useState<string>('')
+    const [customerName, setCustomerName] = useState<string>('')
+    const [customerEmail, setCustomerEmail] = useState<string>('')
+    const [customerAddress, setCustomerAddress] = useState<string>('')
     const navigate = useNavigate()
-    const [formData, setFormData] = useState<CustomerFormData>({
-        customerId: '',
-        customerName: '',
-        customerEmail: '',
-        customerAddress: '',
-    })
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }))
-    }
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
+        const formData = {
+            customerId,
+            customerName,
+            customerEmail,
+            customerAddress,
+        }
+
         try {
-            const response = await fetch(
-                'http://localhost:5000/api/v1/customers/create-customer',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: formData }),
-                },
-            )
+            const result = await createCustomer(formData).unwrap()
 
-            const result = await response.json()
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to create customer')
-            }
-
-            toast.success(result.message)
-            setFormData({
-                customerId: '',
-                customerName: '',
-                customerEmail: '',
-                customerAddress: '',
-            })
+            toast.success(result.message || 'Customer created successfully!')
 
             navigate('/dashboard/customers')
         } catch (err) {
-            toast.error((err as Error).message) // Show error toast
+            toast.error((err as Error).message)
         }
     }
 
@@ -81,8 +52,8 @@ export default function CreateCustomer() {
                                 name="customerId"
                                 type="text"
                                 placeholder="Enter Customer ID"
-                                value={formData.customerId}
-                                onChange={handleChange}
+                                value={customerId}
+                                onChange={(e) => setCustomerId(e.target.value)}
                                 required
                             />
                         </div>
@@ -98,8 +69,10 @@ export default function CreateCustomer() {
                                 name="customerName"
                                 type="text"
                                 placeholder="Enter Customer Name"
-                                value={formData.customerName}
-                                onChange={handleChange}
+                                value={customerName}
+                                onChange={(e) =>
+                                    setCustomerName(e.target.value)
+                                }
                                 required
                             />
                         </div>
@@ -115,8 +88,10 @@ export default function CreateCustomer() {
                                 name="customerEmail"
                                 type="email"
                                 placeholder="Enter Customer Email"
-                                value={formData.customerEmail}
-                                onChange={handleChange}
+                                value={customerEmail}
+                                onChange={(e) =>
+                                    setCustomerEmail(e.target.value)
+                                }
                                 required
                             />
                         </div>
@@ -132,13 +107,19 @@ export default function CreateCustomer() {
                                 name="customerAddress"
                                 type="text"
                                 placeholder="Enter Customer Address"
-                                value={formData.customerAddress}
-                                onChange={handleChange}
+                                value={customerAddress}
+                                onChange={(e) =>
+                                    setCustomerAddress(e.target.value)
+                                }
                                 required
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="mx-auto items-center flex">
+                    <Button
+                        type="submit"
+                        className="mx-auto items-center flex"
+                        disabled={isLoading}
+                    >
                         Create Customer
                     </Button>
                 </form>
