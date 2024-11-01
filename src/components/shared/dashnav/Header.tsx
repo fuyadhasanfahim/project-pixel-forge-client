@@ -18,27 +18,45 @@ import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
-const tabs = [
+const navItems = [
     {
-        id: 1,
-        name: 'Expense Record',
-        link: '/dashboard/expense-record',
+        to: '/dashboard',
+        label: 'Dashboard',
+        icon: <Home className="h-5 w-5" />,
     },
     {
-        id: 2,
-        name: 'Create Expense',
-        link: '/dashboard/create-expense',
+        to: '/dashboard/add-order',
+        label: 'Add Order',
+        icon: <PlusSquare className="h-5 w-5" />,
     },
     {
-        id: 1,
-        name: 'Expenses Head',
-        link: '/dashboard/expenses-head',
+        to: '/dashboard/previous-orders',
+        label: 'Previous Orders',
+        icon: <ShoppingCart className="h-5 w-5" />,
+        badge: 6,
     },
     {
-        id: 1,
-        name: 'Add Expenses Head',
-        link: '/dashboard/add-expenses-head',
+        to: '/dashboard/invoices',
+        label: 'Invoices',
+        icon: <DollarSign className="h-5 w-5" />,
     },
+    {
+        to: '/dashboard/customers',
+        label: 'Customers',
+        icon: <Users className="h-5 w-5" />,
+    },
+    {
+        to: '#',
+        label: 'Settings',
+        icon: <Settings className="h-5 w-5" />,
+    },
+]
+
+const expenseTabs = [
+    { name: 'Expense Record', link: '/dashboard/expense-record' },
+    { name: 'Create Expense', link: '/dashboard/create-expense' },
+    { name: 'Expenses Head', link: '/dashboard/expenses-head' },
+    { name: 'Add Expenses Head', link: '/dashboard/add-expenses-head' },
 ]
 
 export default function Header() {
@@ -53,6 +71,7 @@ export default function Header() {
     const handleToggle = () => {
         setIsExpenseOpen(!isExpenseOpen)
     }
+
     const location = useLocation()
 
     return (
@@ -77,48 +96,31 @@ export default function Header() {
                             <Package2 className="h-6 w-6" />
                             <span className="sr-only">Acme Inc</span>
                         </Link>
-                        <Link
-                            to={'/dashboard'}
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <Home className="h-5 w-5" />
-                            Dashboard
-                        </Link>
-                        <Link
-                            to={'/dashboard/add-order'}
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <PlusSquare className="h-5 w-5" />
-                            Add Order
-                        </Link>
-                        <Link
-                            to={'/dashboard/previous-orders'}
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <ShoppingCart className="h-5 w-5" />
-                            Previous Orders
-                            <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                                6
-                            </Badge>
-                        </Link>
-                        <Link
-                            to={'/dashboard/invoices'}
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <DollarSign className="h-5 w-5" />
-                            Invoices
-                        </Link>
-                        <Link
-                            to={'/dashboard/customer-support'}
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <Users className="h-5 w-5" />
-                            Customer Support
-                        </Link>
+                        {navItems.map((item, index) => (
+                            <Link
+                                key={index}
+                                to={item.to}
+                                className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${
+                                    location.pathname === item.to &&
+                                    'text-primary'
+                                }`}
+                            >
+                                {item.icon}
+                                {item.label}
+                                {item.badge && (
+                                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                                        {item.badge}
+                                    </Badge>
+                                )}
+                            </Link>
+                        ))}
                         <div>
                             <Button
                                 variant="ghost"
-                                className={`flex items-center justify-between w-full gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${isExpenseOpen && 'text-primary bg-gray-100 rounded-b-none'}`}
+                                className={`flex items-center justify-between w-full gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${
+                                    isExpenseOpen &&
+                                    'text-primary bg-gray-100 rounded-b-none'
+                                }`}
                                 onClick={handleToggle}
                             >
                                 <span className="flex items-center gap-3 text-lg">
@@ -133,7 +135,7 @@ export default function Header() {
                             </Button>
                             {isExpenseOpen && (
                                 <ul className="bg-gray-100 rounded-b-lg pl-4 list-disc">
-                                    {tabs.map((tab, index) => (
+                                    {expenseTabs.map((tab, index) => (
                                         <Link
                                             key={index}
                                             to={tab.link}
@@ -149,12 +151,6 @@ export default function Header() {
                                 </ul>
                             )}
                         </div>
-                        <button
-                            className={`flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground ${location.pathname === '/dashboard' && 'text-primary'}`}
-                        >
-                            <Settings className="h-5 w-5" />
-                            Settings
-                        </button>
                     </nav>
                 </SheetContent>
             </Sheet>

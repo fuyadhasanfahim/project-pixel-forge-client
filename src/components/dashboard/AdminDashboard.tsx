@@ -166,10 +166,6 @@ export default function AdminDashboard() {
 
             {topSectionOrders.length > 0 ? (
                 <div>
-                    <h3 className="mb-3 text-xl">
-                        Pending, In Progress , and Awaiting Additional Info
-                        Orders
-                    </h3>
                     {topSectionOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>
@@ -198,7 +194,6 @@ export default function AdminDashboard() {
 
             {completedOrders && (
                 <div>
-                    <h3 className="mb-3 text-xl">Completed Orders</h3>
                     {completedOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>
@@ -226,7 +221,6 @@ export default function AdminDashboard() {
 
             {canceledOrders && (
                 <div>
-                    <h3 className="mb-3 text-xl">Canceled Orders</h3>
                     {canceledOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>

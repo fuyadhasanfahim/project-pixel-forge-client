@@ -1,4 +1,3 @@
-import { RootState } from '@/app/store'
 import {
     Table,
     TableBody,
@@ -7,18 +6,22 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
+import { servicesData } from '@/data/addOrder'
+import { useFetchAllOrdersQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
-import IUser from '@/types/userInterface'
-import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-export default function Dashboard() {
-    const { user } = useSelector((state: RootState) => state.auth)
-    const { _id } = user as IUser
-    const userId = _id
-    const { data, isLoading } = useFetchOrderByUserIdQuery(userId)
+export default function AdminDashboard() {
+    const { data, isLoading, error } = useFetchAllOrdersQuery([])
     const navigate = useNavigate()
+
+    if (error) {
+        return (
+            <div className="h-screen flex items-center justify-center">
+                <p>No order found.</p>
+            </div>
+        )
+    }
 
     if (isLoading) {
         return (
@@ -30,17 +33,25 @@ export default function Dashboard() {
 
     const orders = data?.orders || []
 
-    const topSectionOrders = orders.filter((order: IOrders) =>
+    if (orders.length === 0) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                No orders found
+            </div>
+        )
+    }
+
+    const topSectionOrders = orders?.filter((order: IOrders) =>
         [
             'pending',
             'request for additional information',
             'inprogress',
         ].includes(order.status),
     )
-    const canceledOrders = orders.filter(
+    const canceledOrders = orders?.filter(
         (order: IOrders) => order.status === 'canceled',
     )
-    const completedOrders = orders.filter(
+    const completedOrders = orders?.filter(
         (order: IOrders) => order.status === 'completed',
     )
 
@@ -63,46 +74,75 @@ export default function Dashboard() {
         }
     }
 
-    const renderPaymentStatus = (order: IOrders) => {
-        return order.paymentStatus === 'paid' ? 'paid' : 'pending'
+    const calculateOrderPrice = (order: IOrders) => {
+        const totalServicePrice = order.services.reduce((total, service) => {
+            const foundService = servicesData.find((s) => s.name === service)
+
+            if (foundService) {
+                const complexity = order.complexities[service]
+                if (complexity) {
+                    const complexityData = foundService.complexities.find((c) =>
+                        c.label.includes(complexity),
+                    )
+
+                    if (complexityData) {
+                        const priceMatch = complexityData.label.match(/\d+/)
+                        const complexityPrice = priceMatch
+                            ? parseInt(priceMatch[0])
+                            : 0
+
+                        return total + complexityPrice
+                    }
+                }
+            }
+
+            return total
+        }, 0)
+
+        return totalServicePrice * Number(order.images)
     }
+
+    const renderPaymentStatus = (order: IOrders) => (
+        <span
+            className={
+                order.paymentStatus === 'paid'
+                    ? 'text-green-500'
+                    : 'text-red-500'
+            }
+        >
+            {order.paymentStatus}
+        </span>
+    )
 
     const renderOrders = (
         orders: IOrders[],
         showPaymentStatus: boolean = false,
     ) => {
         return orders?.map((order: IOrders, index: number) => (
-            <TableRow
-                key={index}
-                className={` ${getStatusColor(order.status)}`}
-            >
-                <TableCell className="border border-black">
+            <TableRow key={index} className={`${getStatusColor(order.status)}`}>
+                <TableCell>
                     {new Date(order.deliveryDate).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="font-medium border border-black">
-                    {order._id}
-                </TableCell>
-                <TableCell className="border border-black">
-                    {order.username}
-                </TableCell>
-                <TableCell className="border border-black">
+                <TableCell className="font-medium">{order._id}</TableCell>
+                <TableCell>{order.username}</TableCell>
+                <TableCell>
                     {order?.services?.length > 0
                         ? order.services.join(', ')
                         : 'No services available'}{' '}
                 </TableCell>
-                <TableCell className="border border-black">1000</TableCell>
-                <TableCell className="border border-black">$ 150</TableCell>
-                <TableCell className="border border-black">
+                <TableCell>{order?.images || 0}</TableCell>
+                <TableCell>$ {calculateOrderPrice(order)}</TableCell>
+                <TableCell>
                     <span className={`font-semibold uppercase`}>
                         {order.status}
                     </span>
                 </TableCell>
                 {showPaymentStatus && (
-                    <TableCell className="uppercase border border-black">
+                    <TableCell className="uppercase">
                         {renderPaymentStatus(order)}
                     </TableCell>
                 )}
-                <TableCell className="border border-black">
+                <TableCell>
                     <button
                         className="underline"
                         onClick={() =>
@@ -118,12 +158,8 @@ export default function Dashboard() {
 
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 space-y-4">
-            {topSectionOrders && (
+            {topSectionOrders.length > 0 ? (
                 <div>
-                    <div className="mb-3 text-2xl">
-                        Pending, In Progress , and Awaiting Additional Info
-                        Orders
-                    </div>
                     {topSectionOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>
@@ -146,11 +182,12 @@ export default function Dashboard() {
                         </Table>
                     )}
                 </div>
+            ) : (
+                <div>No Orders Available</div>
             )}
 
             {completedOrders && (
                 <div>
-                    <h3 className="mb-3 text-2xl">Completed Orders</h3>
                     {completedOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>
@@ -178,7 +215,6 @@ export default function Dashboard() {
 
             {canceledOrders && (
                 <div>
-                    <h3 className="mb-3 text-2xl">Canceled Orders</h3>
                     {canceledOrders?.length > 0 && (
                         <Table className="border rounded-md">
                             <TableHeader>

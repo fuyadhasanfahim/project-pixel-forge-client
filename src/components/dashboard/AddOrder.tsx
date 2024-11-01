@@ -14,9 +14,43 @@ import OutputFormat from './add-order-props/OutputFormat'
 import DeliveryDate from './add-order-props/DeliveryDate'
 import { DeliveryTime } from './add-order-props/DeliveryTime'
 import UploadFiles from './add-order-props/UploadFiles'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import Inputs from './add-order-props/Inputs'
+import ICustomerFormData from '@/types/customerInterface'
+import { Label } from '../ui/label'
 
 export default function AddOrderForm() {
+    const [customers, setCustomers] = useState<ICustomerFormData[]>([])
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            try {
+                const response = await fetch(
+                    'http://localhost:5000/api/v1/customers/get-customers',
+                )
+                const result = await response.json()
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || 'Failed to fetch customers',
+                    )
+                }
+
+                setCustomers(result.customers)
+            } catch (err) {
+                toast.error((err as Error).message) // Show error toast
+            }
+        }
+
+        fetchCustomers()
+    }, [])
+
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id, username, name, email, profileImage } = user as IUser
 
@@ -239,6 +273,36 @@ export default function AddOrderForm() {
                         value={totalPrice}
                         setValue={setTotalPrice}
                     />
+
+                    <div>
+                        <Label
+                            htmlFor="customerSelect"
+                            className="block text-lg"
+                        >
+                            Customer ID
+                        </Label>
+                        <Select>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select Customer ID" />
+                            </SelectTrigger>
+                            <SelectContent id="customerSelect">
+                                {customers.length > 0 ? (
+                                    customers.map((customer) => (
+                                        <SelectItem
+                                            key={customer.customerId}
+                                            value={customer.customerId}
+                                        >
+                                            {customer.customerId}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <SelectItem value="" disabled>
+                                        No customers found
+                                    </SelectItem>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="flex items-center flex-wrap gap-5">

@@ -23,6 +23,8 @@ import AddExpensesHeadPage from './pages/dashboard/expense-page/AddExpensesHead'
 import CreateExpensePage from './pages/dashboard/expense-page/CreateExpensePage'
 import ExpenseRecordPage from './pages/dashboard/expense-page/ExpenseRecordPage'
 import ExpensesHeadPage from './pages/dashboard/expense-page/ExpensesHeadPage'
+import CustomersPage from './pages/dashboard/CustomersPage'
+import CreateCustomerPage from './pages/dashboard/CreateCustomerPage'
 
 export default function App() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -124,7 +126,7 @@ export default function App() {
                 <Route
                     path="/dashboard/inbox"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={['superAdmin']}>
                             <OnlyInboxPage />
                         </PrivateRoute>
                     }
@@ -132,7 +134,7 @@ export default function App() {
                 <Route
                     path="/dashboard/inbox/:conversationId"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={['superAdmin']}>
                             <InboxPage />
                         </PrivateRoute>
                     }
@@ -166,6 +168,22 @@ export default function App() {
                     element={
                         <PrivateRoute>
                             <AddExpensesHeadPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/customers"
+                    element={
+                        <PrivateRoute>
+                            <CustomersPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/customers/create-customer"
+                    element={
+                        <PrivateRoute>
+                            <CreateCustomerPage />
                         </PrivateRoute>
                     }
                 />
