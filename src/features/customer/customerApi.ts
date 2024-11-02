@@ -20,7 +20,18 @@ export const customerApi = apiSlice.injectEndpoints({
                       }))
                     : [],
         }),
+        getCustomerByCustomerId: builder.query({
+            query: (customerId) => ({
+                url: `/customers/get-customer/${customerId}`,
+            }),
+            providesTags: (result) =>
+                result ? [{ type: 'Customers', id: result._id }] : [],
+        }),
     }),
 })
 
-export const { useCreateCustomerMutation, useGetCustomersQuery } = customerApi
+export const {
+    useCreateCustomerMutation,
+    useGetCustomersQuery,
+    useGetCustomerByCustomerIdQuery,
+} = customerApi

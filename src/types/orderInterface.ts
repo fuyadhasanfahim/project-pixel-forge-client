@@ -1,4 +1,9 @@
 interface IOrders {
+    customerId: any
+    name: string
+    invoiceNumber: string
+    totalPrice: number
+    ceratedAt: Date
     _id: string
     userId: string
     username: string
@@ -18,6 +23,7 @@ interface IOrders {
     paymentStatus: 'pending' | 'paid'
     folderUrl: string
     images: string
+    orderName: string
 }
 
 export default IOrders

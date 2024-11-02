@@ -22,6 +22,11 @@ import Inputs from './add-order-props/Inputs'
 import { Label } from '../ui/label'
 import { useGetCustomersQuery } from '@/features/customer/customerApi'
 import ICustomerFormData from '@/types/customerInterface'
+import moment from 'moment'
+
+function generateExpenseNumber() {
+    return `INV-${moment().format('DDMMYYYYhhmm')}`
+}
 
 export default function AddOrderForm() {
     const {
@@ -49,11 +54,19 @@ export default function AddOrderForm() {
     const [deliveryDate, setDeliveryDate] = useState<Date | null>(null)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
     const [imagesLink, setImagesLink] = useState<string>('')
+    const [orderName, setOrderName] = useState<string>('')
     const [images, setImages] = useState<string>('')
     const [pricePerImage, setPricePerImage] = useState<string>('')
     const [totalBudget, setTotalBudget] = useState<string>('')
     const [totalPrice, setTotalPrice] = useState<string>('')
     const [customerId, setCustomerId] = useState<string>('')
+    const [invoiceNumber, setInvoiceNumber] = useState<string>(
+        generateExpenseNumber(),
+    )
+
+    useEffect(() => {
+        setInvoiceNumber(generateExpenseNumber())
+    }, [])
 
     const [postOrder, { isLoading }] = usePostOrderMutation()
 
@@ -104,6 +117,7 @@ export default function AddOrderForm() {
         e.preventDefault()
 
         const orderData = {
+            invoiceNumber,
             userId: _id,
             username,
             name,
@@ -122,11 +136,13 @@ export default function AddOrderForm() {
             totalBudget,
             totalPrice,
             customerId,
+            orderName,
         }
 
         try {
             await postOrder(orderData).unwrap()
             toast.success('Order placed successfully.')
+
             setFiles([])
             setSelectedServices({})
             setComplexities({})
@@ -134,6 +150,14 @@ export default function AddOrderForm() {
             setOutputFormat('')
             setDeliveryDate(null)
             setUploadProgress(0)
+            setImagesLink('')
+            setOrderName('')
+            setImages('')
+            setPricePerImage('')
+            setTotalBudget('')
+            setTotalPrice('')
+            setCustomerId('')
+            setInvoiceNumber(generateExpenseNumber())
         } catch (error) {
             toast.error((error as Error).message)
         }
@@ -148,6 +172,16 @@ export default function AddOrderForm() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <UploadFiles files={files} uploadProgress={uploadProgress} />
+
+                <Inputs
+                    type={'text'}
+                    id={'folder-name'}
+                    placeholder={'Enter order name or folder name here'}
+                    readOnly={false}
+                    label={'Order Name/ Folder Name'}
+                    value={orderName}
+                    setValue={setOrderName}
+                />
 
                 <SelectServiceAndComplexities
                     handleServiceChange={handleServiceChange}

@@ -8,49 +8,21 @@ import {
     TableRow,
     TableCell,
 } from '../ui/table'
-import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-
-interface Customer {
-    customerId: string
-    customerName: string
-    customerEmail: string
-    customerAddress: string
-}
+import { useGetCustomersQuery } from '@/features/customer/customerApi'
+import ICustomerFormData from '@/types/customerInterface'
 
 export default function Customers() {
-    const [customers, setCustomers] = useState<Customer[]>([])
-    const [loading, setLoading] = useState<boolean>(true)
-    const [, setError] = useState<string | null>(null)
+    const { data, isLoading, error } = useGetCustomersQuery([])
+    const customers = (data?.customers as ICustomerFormData[]) || []
 
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            try {
-                const response = await fetch(
-                    'http://localhost:5000/api/v1/customers/get-customers',
-                )
-                const result = await response.json()
-
-                if (!response.ok) {
-                    throw new Error(
-                        result.message || 'Failed to fetch customers',
-                    )
-                }
-
-                setCustomers(result.customers)
-            } catch (err) {
-                setError((err as Error).message)
-                toast.error((err as Error).message) // Show error toast
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchCustomers()
-    }, [])
-
-    if (loading) {
+    if (isLoading) {
         return <div>Loading...</div>
+    }
+
+    if (error) {
+        toast.error('Failed to fetch customers')
+        return <div>Error loading customers.</div>
     }
 
     return (
@@ -65,19 +37,19 @@ export default function Customers() {
             </div>
 
             <div>
-                <Table className="">
+                <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead className="border border-black">
+                        <TableRow className="bg-green-500">
+                            <TableHead className="border border-black text-white">
                                 Customer Id
                             </TableHead>
-                            <TableHead className="border border-black">
+                            <TableHead className="border border-black text-white">
                                 Customer Name
                             </TableHead>
-                            <TableHead className="border border-black">
+                            <TableHead className="border border-black text-white">
                                 Customer Email
                             </TableHead>
-                            <TableHead className="border border-black">
+                            <TableHead className="border border-black text-white">
                                 Customer Address
                             </TableHead>
                         </TableRow>

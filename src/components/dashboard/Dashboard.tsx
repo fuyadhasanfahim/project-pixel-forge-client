@@ -6,32 +6,54 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { servicesData } from '@/data/addOrder'
+import { useGetCustomersQuery } from '@/features/customer/customerApi'
 import { useFetchAllOrdersQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
 import { useNavigate } from 'react-router-dom'
 
 export default function AdminDashboard() {
-    const { data, isLoading, error } = useFetchAllOrdersQuery([])
+    const {
+        data: ordersData,
+        isLoading: ordersLoading,
+        error: ordersError,
+    } = useFetchAllOrdersQuery([])
+    const {
+        data: customersData,
+        isLoading: customersLoading,
+        error: customersError,
+    } = useGetCustomersQuery([])
     const navigate = useNavigate()
 
-    if (error) {
+    const orders = ordersData?.orders || []
+    const customers = customersData?.customers || []
+
+    // Map customerId to customer name
+    const customerNameMap = customers.reduce(
+        (
+            acc: Record<string, string>,
+            customer: { customerId: string; customerName: string },
+        ) => {
+            acc[customer.customerId] = customer.customerName
+            return acc
+        },
+        {},
+    )
+
+    if (ordersError || customersError) {
         return (
             <div className="h-screen flex items-center justify-center">
-                <p>No order found.</p>
+                <p>Error loading data.</p>
             </div>
         )
     }
 
-    if (isLoading) {
+    if (ordersLoading || customersLoading) {
         return (
             <div className="h-screen flex justify-center items-center">
                 Loading...
             </div>
         )
     }
-
-    const orders = data?.orders || []
 
     if (orders.length === 0) {
         return (
@@ -41,17 +63,17 @@ export default function AdminDashboard() {
         )
     }
 
-    const topSectionOrders = orders?.filter((order: IOrders) =>
+    const topSectionOrders = orders.filter((order: IOrders) =>
         [
             'pending',
             'request for additional information',
             'inprogress',
         ].includes(order.status),
     )
-    const canceledOrders = orders?.filter(
+    const canceledOrders = orders.filter(
         (order: IOrders) => order.status === 'canceled',
     )
-    const completedOrders = orders?.filter(
+    const completedOrders = orders.filter(
         (order: IOrders) => order.status === 'completed',
     )
 
@@ -74,34 +96,6 @@ export default function AdminDashboard() {
         }
     }
 
-    const calculateOrderPrice = (order: IOrders) => {
-        const totalServicePrice = order.services.reduce((total, service) => {
-            const foundService = servicesData.find((s) => s.name === service)
-
-            if (foundService) {
-                const complexity = order.complexities[service]
-                if (complexity) {
-                    const complexityData = foundService.complexities.find((c) =>
-                        c.label.includes(complexity),
-                    )
-
-                    if (complexityData) {
-                        const priceMatch = complexityData.label.match(/\d+/)
-                        const complexityPrice = priceMatch
-                            ? parseInt(priceMatch[0])
-                            : 0
-
-                        return total + complexityPrice
-                    }
-                }
-            }
-
-            return total
-        }, 0)
-
-        return totalServicePrice * Number(order.images)
-    }
-
     const renderPaymentStatus = (order: IOrders) => (
         <span
             className={
@@ -118,125 +112,123 @@ export default function AdminDashboard() {
         orders: IOrders[],
         showPaymentStatus: boolean = false,
     ) => {
-        return orders?.map((order: IOrders, index: number) => (
-            <TableRow key={index} className={`${getStatusColor(order.status)}`}>
-                <TableCell>
-                    {new Date(order.deliveryDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="font-medium">{order._id}</TableCell>
-                <TableCell>{order.username}</TableCell>
-                <TableCell>
-                    {order?.services?.length > 0
-                        ? order.services.join(', ')
-                        : 'No services available'}{' '}
-                </TableCell>
-                <TableCell>{order?.images || 0}</TableCell>
-                <TableCell>$ {calculateOrderPrice(order)}</TableCell>
-                <TableCell>
-                    <span className={`font-semibold uppercase`}>
-                        {order.status}
-                    </span>
-                </TableCell>
-                {showPaymentStatus && (
-                    <TableCell className="uppercase">
-                        {renderPaymentStatus(order)}
+        return orders.map((order: IOrders, index: number) => {
+            const customerName = customerNameMap[order.customerId] || 'N/A'
+            return (
+                <TableRow
+                    key={index}
+                    className={`${getStatusColor(order.status)}`}
+                >
+                    <TableCell className="border border-black">
+                        {new Date(order.deliveryDate).toLocaleDateString()}
                     </TableCell>
-                )}
-                <TableCell>
-                    <button
-                        className="underline"
-                        onClick={() =>
-                            navigate(`/dashboard/view-order-info/${order._id}`)
-                        }
-                    >
-                        View
-                    </button>
-                </TableCell>
-            </TableRow>
-        ))
+                    <TableCell className="font-medium border border-black w-60">
+                        {order.invoiceNumber}
+                    </TableCell>
+                    <TableCell className="border border-black">
+                        {customerName}
+                    </TableCell>
+                    <TableCell className="border border-black">
+                        {order?.services?.length > 0
+                            ? order.services.join(', ')
+                            : 'No services available'}{' '}
+                    </TableCell>
+                    <TableCell className="border border-black">
+                        {order?.images || 0}
+                    </TableCell>
+                    <TableCell className="border border-black">
+                        $ {order?.totalPrice || 0}
+                    </TableCell>
+                    <TableCell className="border border-black">
+                        <span className={`font-semibold uppercase`}>
+                            {order.status}
+                        </span>
+                    </TableCell>
+                    {showPaymentStatus && (
+                        <TableCell className="uppercase border border-black">
+                            {renderPaymentStatus(order)}
+                        </TableCell>
+                    )}
+                    <TableCell className="border border-black">
+                        <button
+                            className="underline"
+                            onClick={() =>
+                                navigate(
+                                    `/dashboard/view-order-info/${order._id}`,
+                                )
+                            }
+                        >
+                            View
+                        </button>
+                    </TableCell>
+                </TableRow>
+            )
+        })
     }
 
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 space-y-4">
             {topSectionOrders.length > 0 ? (
                 <div>
-                    {topSectionOrders?.length > 0 && (
-                        <Table className="border rounded-md">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Delivery Date</TableHead>
-                                    <TableHead className="w-[100px]">
-                                        Invoice no.
-                                    </TableHead>
-                                    <TableHead>Username</TableHead>
-                                    <TableHead>Services</TableHead>
-                                    <TableHead>Images</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Info</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody className={``}>
-                                {renderOrders(topSectionOrders)}
-                            </TableBody>
-                        </Table>
-                    )}
+                    <Table className="border rounded-md">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Invoice Number</TableHead>
+                                <TableHead>Customer Name</TableHead>
+                                <TableHead>Services</TableHead>
+                                <TableHead>Images</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Info</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>{renderOrders(topSectionOrders)}</TableBody>
+                    </Table>
                 </div>
             ) : (
                 <div>No Orders Available</div>
             )}
 
-            {completedOrders && (
-                <div>
-                    {completedOrders?.length > 0 && (
-                        <Table className="border rounded-md">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Delivery Date</TableHead>
-                                    <TableHead className="w-[100px]">
-                                        Invoice no.
-                                    </TableHead>
-                                    <TableHead>Username</TableHead>
-                                    <TableHead>Services</TableHead>
-                                    <TableHead>Images</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Payment</TableHead>
-                                    <TableHead>Info</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody className="text-white bg-green-700">
-                                {renderOrders(completedOrders, true)}
-                            </TableBody>
-                        </Table>
-                    )}
-                </div>
+            {completedOrders.length > 0 && (
+                <Table className="border rounded-md">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Delivery Date</TableHead>
+                            <TableHead>Invoice no.</TableHead>
+                            <TableHead>Username</TableHead>
+                            <TableHead>Services</TableHead>
+                            <TableHead>Images</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Payment</TableHead>
+                            <TableHead>Info</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="text-white bg-green-700">
+                        {renderOrders(completedOrders, true)}
+                    </TableBody>
+                </Table>
             )}
 
-            {canceledOrders && (
-                <div>
-                    {canceledOrders?.length > 0 && (
-                        <Table className="border rounded-md">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Delivery Date</TableHead>
-                                    <TableHead className="w-[100px]">
-                                        Invoice no.
-                                    </TableHead>
-                                    <TableHead>Username</TableHead>
-                                    <TableHead>Services</TableHead>
-                                    <TableHead>Images</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Info</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody className="text-white bg-red-700">
-                                {renderOrders(canceledOrders)}
-                            </TableBody>
-                        </Table>
-                    )}
-                </div>
+            {canceledOrders.length > 0 && (
+                <Table className="border rounded-md">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Delivery Date</TableHead>
+                            <TableHead>Invoice no.</TableHead>
+                            <TableHead>Username</TableHead>
+                            <TableHead>Services</TableHead>
+                            <TableHead>Images</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Info</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="text-white bg-red-700">
+                        {renderOrders(canceledOrders)}
+                    </TableBody>
+                </Table>
             )}
         </main>
     )
