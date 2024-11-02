@@ -37,6 +37,7 @@ export default function AddExpenseHead() {
             await addExpenseHead(formData).unwrap()
 
             toast.success('Expense added successfully.')
+
             setFormData({
                 name: '',
                 creditType: '',
@@ -81,7 +82,11 @@ export default function AddExpenseHead() {
                         >
                             Credit Type
                         </Label>
-                        <Select onValueChange={handleSelectChange}>
+                        <Select
+                            key={formData.creditType}
+                            onValueChange={handleSelectChange}
+                            required
+                        >
                             <SelectTrigger
                                 id="credit-type"
                                 className="w-full mt-1"
