@@ -25,6 +25,9 @@ import ExpenseRecordPage from './pages/dashboard/expense-page/ExpenseRecordPage'
 import ExpensesHeadPage from './pages/dashboard/expense-page/ExpensesHeadPage'
 import CustomersPage from './pages/dashboard/CustomersPage'
 import CreateCustomerPage from './pages/dashboard/CreateCustomerPage'
+import Navbar from './components/shared/navbar/Navbar'
+import CreateUserPage from './pages/dashboard/CreateUserPage'
+import UsersPage from './pages/dashboard/UsersPage'
 
 export default function App() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -41,6 +44,7 @@ export default function App() {
         </div>
     ) : (
         <BrowserRouter>
+            <Navbar />
             <Routes>
                 <Route
                     path="/auth"
@@ -184,6 +188,22 @@ export default function App() {
                     element={
                         <PrivateRoute>
                             <CreateCustomerPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/create-user"
+                    element={
+                        <PrivateRoute>
+                            <CreateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/users"
+                    element={
+                        <PrivateRoute>
+                            <UsersPage />
                         </PrivateRoute>
                     }
                 />

@@ -5,19 +5,11 @@ import {
     PlusSquare,
     DollarSign,
     Settings,
-    Slack,
     Mail,
+    User,
+    UserSquareIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store'
@@ -28,7 +20,7 @@ import React, { useEffect, useState } from 'react'
 
 export default function Sidebar() {
     const { user } = useSelector((state: RootState) => state.auth)
-    const { _id, profileImage, role } = user as IUser
+    const { _id, role } = user as IUser
     const userId = _id
     const { data } = useFetchOrderByUserIdQuery(userId)
 
@@ -51,38 +43,50 @@ export default function Sidebar() {
             to: '/dashboard',
             label: 'Dashboard',
             icon: <Home className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'user', 'teamManager', 'teamLeader'],
         },
         {
             to: '/dashboard/add-order',
             label: 'Add Order',
             icon: <PlusSquare className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'user'],
         },
         {
             to: '/dashboard/inbox',
             label: 'Inbox',
             icon: <Mail className="h-4 w-4" />,
-            roles: ['superAdmin'],
+            roles: ['superAdmin', 'admin'],
         },
         {
             to: '/dashboard/previous-orders',
             label: 'Previous Orders',
             icon: <ShoppingCart className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'user'],
             badge: data?.orders?.length ?? 0,
         },
         {
             to: '/dashboard/invoices',
             label: 'Invoices',
             icon: <DollarSign className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'user'],
         },
         {
             to: '/dashboard/customers',
             label: 'Customers',
             icon: <Users className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin'],
+        },
+        {
+            to: '/dashboard/create-user',
+            label: 'Create User',
+            icon: <User className="h-4 w-4" />,
+            roles: ['superAdmin'],
+        },
+        {
+            to: '/dashboard/users',
+            label: 'Users',
+            icon: <UserSquareIcon className="h-4 w-4" />,
+            roles: ['superAdmin', 'admin'],
         },
         {
             component: (
@@ -91,82 +95,55 @@ export default function Sidebar() {
                     handleToggle={handleToggle}
                 />
             ),
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'accountant'],
         },
         {
             to: '#',
             label: 'Settings',
             icon: <Settings className="h-4 w-4" />,
-            roles: ['user', 'superAdmin'],
+            roles: ['superAdmin', 'admin', 'user'],
         },
     ]
 
+    const filteredNavItems = navItems.filter((item) =>
+        item.roles.includes(role),
+    )
+
     return (
         <div className="hidden border-r bg-muted/40 md:block h-full">
-            <div className="flex h-full max-h-screen flex-col gap-2">
-                <div className="flex justify-between gap-2 h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-                    <Link
-                        to={'/'}
-                        className="flex items-center gap-2 font-semibold"
-                    >
-                        <Slack className="h-6 w-6" />
-                        <span>Project Pixel Forge</span>
-                    </Link>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="secondary"
-                                size="icon"
-                                className="rounded-full"
-                            >
-                                <img
-                                    src={profileImage}
-                                    alt="profileImage"
-                                    className="rounded-full"
-                                />
-                                <span className="sr-only">
-                                    Toggle user menu
-                                </span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Settings</DropdownMenuItem>
-                            <DropdownMenuItem>Support</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Logout</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+            <div className="flex h-full max-h-screen flex-col gap-2 mt-2">
                 <div className="flex-1 overflow-y-auto">
                     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                        {navItems.map((item, index) => {
-                            if (!item.roles.includes(role)) return null
-
-                            return item.to ? (
-                                <Link
-                                    key={index}
-                                    to={item.to}
-                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
-                                        location.pathname === item.to &&
-                                        'text-primary'
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                    {item.badge !== undefined && (
-                                        <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                                            {item.badge}
-                                        </Badge>
-                                    )}
-                                </Link>
-                            ) : (
-                                <React.Fragment key={index}>
-                                    {item.component}
-                                </React.Fragment>
+                        {filteredNavItems.length > 0 ? (
+                            filteredNavItems.map((item, index) =>
+                                item.to ? (
+                                    <Link
+                                        key={index}
+                                        to={item.to}
+                                        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
+                                            location.pathname === item.to &&
+                                            'text-primary'
+                                        }`}
+                                    >
+                                        {item.icon}
+                                        {item.label}
+                                        {item.badge !== undefined && (
+                                            <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                                                {item.badge}
+                                            </Badge>
+                                        )}
+                                    </Link>
+                                ) : (
+                                    <React.Fragment key={index}>
+                                        {item.component}
+                                    </React.Fragment>
+                                ),
                             )
-                        })}
+                        ) : (
+                            <p className="px-3 py-2 text-muted-foreground">
+                                You do not have access to any sections.
+                            </p>
+                        )}
                     </nav>
                 </div>
             </div>

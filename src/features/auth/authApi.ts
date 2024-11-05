@@ -30,6 +30,13 @@ export const authApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+        createUser: builder.mutation({
+            query: (data) => ({
+                url: '/users/auth/create-user',
+                method: 'POST',
+                body: data,
+            }),
+        }),
         login: builder.mutation({
             query: (data) => ({
                 url: '/users/auth/login',
@@ -95,13 +102,21 @@ export const authApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+        getAllUsers: builder.query({
+            query: () => ({
+                url: '/users/get-all-users',
+                method: 'GET',
+            }),
+        }),
     }),
 })
 
 export const {
     useRegisterMutation,
+    useCreateUserMutation,
     useLoginMutation,
     useFetchCurrentUserQuery,
     useFetchUserByIdQuery,
     useVerifyEmailMutation,
+    useGetAllUsersQuery,
 } = authApi

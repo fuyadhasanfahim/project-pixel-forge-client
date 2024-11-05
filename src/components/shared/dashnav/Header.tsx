@@ -1,65 +1,19 @@
-import {
-    ChevronDown,
-    ChevronUp,
-    DollarSign,
-    Edit2Icon,
-    Home,
-    Menu,
-    Package2,
-    PlusSquare,
-    Settings,
-    ShoppingCart,
-    Users,
-} from 'lucide-react'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import IUser from '@/types/userInterface'
+import { ChevronDown, ChevronUp, Edit2Icon, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Link, useLocation } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-
-const navItems = [
-    {
-        to: '/dashboard',
-        label: 'Dashboard',
-        icon: <Home className="h-5 w-5" />,
-    },
-    {
-        to: '/dashboard/add-order',
-        label: 'Add Order',
-        icon: <PlusSquare className="h-5 w-5" />,
-    },
-    {
-        to: '/dashboard/previous-orders',
-        label: 'Previous Orders',
-        icon: <ShoppingCart className="h-5 w-5" />,
-        badge: 6,
-    },
-    {
-        to: '/dashboard/invoices',
-        label: 'Invoices',
-        icon: <DollarSign className="h-5 w-5" />,
-    },
-    {
-        to: '/dashboard/customers',
-        label: 'Customers',
-        icon: <Users className="h-5 w-5" />,
-    },
-    {
-        to: '#',
-        label: 'Settings',
-        icon: <Settings className="h-5 w-5" />,
-    },
-]
-
-const expenseTabs = [
-    { name: 'Expense Record', link: '/dashboard/expense-record' },
-    { name: 'Create Expense', link: '/dashboard/create-expense' },
-    { name: 'Expenses Head', link: '/dashboard/expenses-head' },
-    { name: 'Add Expenses Head', link: '/dashboard/add-expenses-head' },
-]
+import { expenseTabs, navItems } from '@/data/DashNav'
 
 export default function Header() {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { role } = user as IUser
+
     const [isExpenseOpen, setIsExpenseOpen] = useState(() =>
         JSON.parse(localStorage.getItem('isExpenseOpen') || 'false'),
     )
@@ -74,6 +28,10 @@ export default function Header() {
 
     const location = useLocation()
 
+    const filteredNavItems = navItems.filter((item) =>
+        item.roles.includes(role),
+    )
+
     return (
         <header className="flex items-center gap-4 px-4 lg:px-6 p-2 md:p-0">
             <Sheet>
@@ -84,19 +42,11 @@ export default function Header() {
                         className="shrink-0 md:hidden"
                     >
                         <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle navigation menu</span>
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="flex flex-col">
                     <nav className="grid gap-2 text-lg font-medium">
-                        <Link
-                            to={'/'}
-                            className="flex items-center gap-2 text-lg font-semibold"
-                        >
-                            <Package2 className="h-6 w-6" />
-                            <span className="sr-only">Acme Inc</span>
-                        </Link>
-                        {navItems.map((item, index) => (
+                        {filteredNavItems.map((item, index) => (
                             <Link
                                 key={index}
                                 to={item.to}

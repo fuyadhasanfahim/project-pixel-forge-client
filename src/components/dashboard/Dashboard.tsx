@@ -2,6 +2,9 @@ import { useFetchAllOrdersQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import IUser from '@/types/userInterface'
 
 export default function AdminDashboard() {
     const {
@@ -10,6 +13,8 @@ export default function AdminDashboard() {
         error: ordersError,
     } = useFetchAllOrdersQuery([])
     const navigate = useNavigate()
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { role } = user as IUser
 
     const orders = ordersData?.orders || []
 
@@ -153,16 +158,20 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    <Button
-                                        className="underline"
-                                        onClick={() =>
-                                            navigate(
-                                                `/dashboard/view-order-info/${order._id}`,
-                                            )
-                                        }
-                                    >
-                                        View
-                                    </Button>
+                                    {(role === 'user' ||
+                                        role === 'admin' ||
+                                        role === 'superAdmin') && (
+                                        <Button
+                                            className="underline"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/dashboard/view-order-info/${order._id}`,
+                                                )
+                                            }
+                                        >
+                                            View
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         )
