@@ -30,7 +30,7 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="w-full p-4 border-b">
+        <nav className="w-full p-4 border-b" id="navbar">
             <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-10">
                 <div>
                     <Link to="/" className="">

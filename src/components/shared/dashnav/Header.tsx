@@ -33,7 +33,10 @@ export default function Header() {
     )
 
     return (
-        <header className="flex items-center gap-4 px-4 lg:px-6 p-2 md:p-0">
+        <header
+            className="flex items-center gap-4 px-4 lg:px-6 p-2 md:p-0"
+            id="sidebar"
+        >
             <Sheet>
                 <SheetTrigger asChild>
                     <Button

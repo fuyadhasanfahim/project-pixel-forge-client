@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                                             className="underline"
                                             onClick={() =>
                                                 navigate(
-                                                    `/dashboard/view-order-info/${order._id}`,
+                                                    `/view-order-info/${order._id}`,
                                                 )
                                             }
                                         >

@@ -24,8 +24,6 @@ export const customerApi = apiSlice.injectEndpoints({
             query: (customerId) => ({
                 url: `/customers/get-customer/${customerId}`,
             }),
-            providesTags: (result) =>
-                result ? [{ type: 'Customers', id: result._id }] : [],
         }),
     }),
 })

@@ -194,6 +194,7 @@ export default function App() {
                         </PrivateRoute>
                     }
                 />
+
                 <Route
                     path="/invoices/download/:customerId"
                     element={

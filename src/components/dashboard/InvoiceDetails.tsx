@@ -1,22 +1,26 @@
 import { useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useGetOrdersByCustomerIdMutation } from '@/features/orders/orderApi'
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-    CardFooter,
-} from '@/components/ui/card'
-import { Button } from '../ui/button'
 import IOrder from '@/types/orderInterface'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { Button } from '../ui/button'
 
 export default function InvoiceDetails() {
-    const { customerId } = useParams()
+    const { customerId } = useParams<{ customerId: string }>()
     const [getOrdersByCustomerId, { data, isLoading }] =
         useGetOrdersByCustomerIdMutation()
+    const navigate = useNavigate()
 
-    const { orders } = data || []
+    const { orders } = data || { orders: [] }
 
     useEffect(() => {
         if (customerId) {
@@ -33,83 +37,86 @@ export default function InvoiceDetails() {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
-            <h1 className="text-2xl font-semibold mb-6 text-gray-800">
-                Invoice Details
-            </h1>
-            <div className="flex flex-wrap gap-6">
-                {orders?.map((order: IOrder) => {
-                    const totalAmount =
-                        Number(order.images) *
-                        parseFloat(order.pricePerImage || '0')
+        <div className="p-8 bg-gray-50 min-h-screen space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-semibold text-gray-800">
+                    Invoice Details
+                </h1>
 
-                    return (
-                        <Card
-                            key={order._id}
-                            className="shadow-lg p-4 rounded-lg"
-                        >
-                            <CardHeader>
-                                <CardTitle>
-                                    Order #{order.invoiceNumber}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p>
-                                    <strong>Customer Name:</strong> {order.name}{' '}
-                                    ({order.username})
-                                </p>
-                                <p>
-                                    <strong>Email:</strong> {order.email}
-                                </p>
-                                <p>
-                                    <strong>Delivery Date:</strong>{' '}
-                                    {new Date(
-                                        order.deliveryDate,
-                                    ).toLocaleDateString()}
-                                </p>
-                                <p>
-                                    <strong>Services:</strong>{' '}
-                                    {order.services.join(', ')}
-                                </p>
-                                <p>
-                                    <strong>Complexity:</strong>{' '}
-                                    {order.complexities[order.services[0]]}
-                                </p>
-                                <p>
-                                    <strong>Total Images:</strong>{' '}
-                                    {order.images}
-                                </p>
-                                <p>
-                                    <strong>Price Per Image:</strong> $
-                                    {order.pricePerImage}
-                                </p>
-                                <p>
-                                    <strong>Total Amount:</strong> $
-                                    {totalAmount.toFixed(2)}
-                                </p>
-                                <p>
-                                    <strong>Status:</strong> {order.status}
-                                </p>
-                                <p>
-                                    <strong>Payment Status:</strong>{' '}
-                                    {order.paymentStatus}
-                                </p>
-                                <p>
-                                    <strong>Instructions:</strong>{' '}
-                                    {order.instructions}
-                                </p>
-                            </CardContent>
-                            <CardFooter className="flex justify-end">
-                                <Link
-                                    to={`/invoices/download/${order?.customerId}`}
-                                >
-                                    <Button>Get Invoice</Button>
-                                </Link>
-                            </CardFooter>
-                        </Card>
-                    )
-                })}
+                <Button
+                    onClick={() => navigate(`/invoices/download/${customerId}`)}
+                >
+                    Get Invoice
+                </Button>
             </div>
+            <Table>
+                <TableCaption>
+                    A list of orders for customer ID: {customerId}
+                </TableCaption>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Date
+                        </TableHead>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Services
+                        </TableHead>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Description
+                        </TableHead>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Images
+                        </TableHead>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Price/Image
+                        </TableHead>
+                        <TableHead className="border border-black text-white bg-green-500 font-semibold">
+                            Amount
+                        </TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {orders.map((order: IOrder) => {
+                        const totalAmount =
+                            Number(order.images) *
+                            parseFloat(order.pricePerImage || '0')
+                        return (
+                            <TableRow key={order._id}>
+                                <TableCell className="border border-black">
+                                    {new Date(
+                                        order.createdAt,
+                                    ).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="border border-black">
+                                    {order.services.join(', ')}
+                                </TableCell>
+                                <TableCell className="border border-black">
+                                    {order.instructions}
+                                </TableCell>
+                                <TableCell className="border border-black">
+                                    {order.images}
+                                </TableCell>
+                                <TableCell className="border border-black">
+                                    ${order.pricePerImage}
+                                </TableCell>
+                                <TableCell className="border border-black">
+                                    ${totalAmount.toFixed(2)}
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })}
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell
+                            colSpan={12}
+                            className="text-right font-medium"
+                        >
+                            Total Orders: {orders.length}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
         </div>
     )
 }
