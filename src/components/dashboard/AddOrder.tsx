@@ -21,7 +21,7 @@ import {
 import Inputs from './add-order-props/Inputs'
 import { Label } from '../ui/label'
 import { useGetCustomersQuery } from '@/features/customer/customerApi'
-import ICustomerFormData from '@/types/customerInterface'
+import ICustomerInterface from '@/types/customerInterface'
 import moment from 'moment'
 
 function generateExpenseNumber() {
@@ -34,7 +34,7 @@ export default function AddOrderForm() {
         isLoading: customersLoading,
         error,
     } = useGetCustomersQuery([])
-    const customers = (data?.customers as ICustomerFormData[]) || []
+    const customers = (data?.customers as ICustomerInterface[]) || []
 
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id, username, name, email, profileImage } = user as IUser
@@ -57,7 +57,6 @@ export default function AddOrderForm() {
     const [orderName, setOrderName] = useState<string>('')
     const [images, setImages] = useState<string>('')
     const [pricePerImage, setPricePerImage] = useState<string>('')
-    const [totalBudget, setTotalBudget] = useState<string>('')
     const [totalPrice, setTotalPrice] = useState<string>('')
     const [customerId, setCustomerId] = useState<string>('')
     const [invoiceNumber, setInvoiceNumber] = useState<string>(
@@ -82,16 +81,13 @@ export default function AddOrderForm() {
     useEffect(() => {
         const price = Number(pricePerImage)
         const imageCount = Number(images)
-        const budget = parseFloat(totalBudget)
 
-        if (budget > 0) {
-            setTotalPrice(budget.toString())
-        } else if (price > 0 && Number(imageCount) > 0) {
+        if (price > 0 && imageCount > 0) {
             setTotalPrice((price * imageCount).toString())
         } else {
             setTotalPrice('')
         }
-    }, [pricePerImage, images, totalBudget])
+    }, [pricePerImage, images])
 
     const handleServiceChange = (serviceName: string) => {
         setSelectedServices((prev) => ({
@@ -133,7 +129,6 @@ export default function AddOrderForm() {
             imagesLink,
             images,
             pricePerImage,
-            totalBudget,
             totalPrice,
             customerId,
             orderName,
@@ -154,7 +149,6 @@ export default function AddOrderForm() {
             setOrderName('')
             setImages('')
             setPricePerImage('')
-            setTotalBudget('')
             setTotalPrice('')
             setCustomerId('')
             setInvoiceNumber(generateExpenseNumber())
@@ -213,34 +207,15 @@ export default function AddOrderForm() {
                         value={images}
                         setValue={setImages}
                     />
-                    {!totalBudget && (
-                        <Inputs
-                            type={'number'}
-                            id={'price-per-image'}
-                            placeholder={'Enter per image price (Optional)'}
-                            readOnly={false}
-                            label={'Price per image'}
-                            value={pricePerImage}
-                            setValue={(value: string) => {
-                                setPricePerImage(value)
-                                if (value) setTotalBudget('')
-                            }}
-                        />
-                    )}
-                    {!pricePerImage && (
-                        <Inputs
-                            type={'number'}
-                            id={'total-budget'}
-                            placeholder={'Enter total budget'}
-                            readOnly={false}
-                            label={'Total budget'}
-                            value={totalBudget}
-                            setValue={(value: string) => {
-                                setTotalBudget(value)
-                                if (value) setPricePerImage('')
-                            }}
-                        />
-                    )}
+                    <Inputs
+                        type={'number'}
+                        id={'price-per-image'}
+                        placeholder={'Enter per image price'}
+                        readOnly={false}
+                        label={'Price per image'}
+                        value={pricePerImage}
+                        setValue={setPricePerImage}
+                    />
                     <Inputs
                         type={'number'}
                         id={'total-price'}

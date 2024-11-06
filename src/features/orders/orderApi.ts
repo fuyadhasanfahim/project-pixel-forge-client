@@ -87,6 +87,13 @@ export const orderApi = apiSlice.injectEndpoints({
                 'Orders',
             ],
         }),
+        getOrdersByCustomerId: builder.mutation({
+            query: (customerId) => ({
+                url: `/orders/get-order-by-customerId/${customerId}`,
+                method: 'GET',
+            }),
+            invalidatesTags: ['Orders'],
+        }),
     }),
 })
 
@@ -97,4 +104,5 @@ export const {
     useFetchOrderByOrderIdQuery,
     useFetchAllOrdersQuery,
     useUpdateOrderMutation,
+    useGetOrdersByCustomerIdMutation,
 } = orderApi

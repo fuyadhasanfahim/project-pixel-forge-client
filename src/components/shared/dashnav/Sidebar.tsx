@@ -5,8 +5,6 @@ import {
     PlusSquare,
     DollarSign,
     Settings,
-    Mail,
-    User,
     UserSquareIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -40,50 +38,38 @@ export default function Sidebar() {
 
     const navItems = [
         {
-            to: '/dashboard',
+            to: '/',
             label: 'Dashboard',
             icon: <Home className="h-4 w-4" />,
             roles: ['superAdmin', 'admin', 'user', 'teamManager', 'teamLeader'],
         },
         {
-            to: '/dashboard/add-order',
+            to: '/add-order',
             label: 'Add Order',
             icon: <PlusSquare className="h-4 w-4" />,
             roles: ['superAdmin', 'admin', 'user'],
         },
         {
-            to: '/dashboard/inbox',
-            label: 'Inbox',
-            icon: <Mail className="h-4 w-4" />,
-            roles: ['superAdmin', 'admin'],
-        },
-        {
-            to: '/dashboard/previous-orders',
+            to: '/previous-orders',
             label: 'Previous Orders',
             icon: <ShoppingCart className="h-4 w-4" />,
             roles: ['superAdmin', 'admin', 'user'],
             badge: data?.orders?.length ?? 0,
         },
         {
-            to: '/dashboard/invoices',
+            to: '/invoices',
             label: 'Invoices',
             icon: <DollarSign className="h-4 w-4" />,
             roles: ['superAdmin', 'admin', 'user'],
         },
         {
-            to: '/dashboard/customers',
+            to: '/customers',
             label: 'Customers',
             icon: <Users className="h-4 w-4" />,
             roles: ['superAdmin'],
         },
         {
-            to: '/dashboard/create-user',
-            label: 'Create User',
-            icon: <User className="h-4 w-4" />,
-            roles: ['superAdmin'],
-        },
-        {
-            to: '/dashboard/users',
+            to: '/users',
             label: 'Users',
             icon: <UserSquareIcon className="h-4 w-4" />,
             roles: ['superAdmin', 'admin'],

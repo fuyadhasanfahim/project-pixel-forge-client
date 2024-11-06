@@ -15,6 +15,7 @@ import IUser from '@/types/userInterface'
 import { userLoggedOut } from '@/features/auth/authSlice'
 import Cookies from 'js-cookie'
 import { MouseEvent } from 'react'
+import { Mail } from 'lucide-react'
 
 export default function Navbar() {
     const dispatch = useDispatch<AppDispatch>()
@@ -44,7 +45,16 @@ export default function Navbar() {
                 <div>
                     <ul className="flex items-center gap-10 justify-between">
                         <li>
-                            <Link to={'/dashboard'}>Dashboard</Link>
+                            <Link to={'/'}>Dashboard</Link>
+                        </li>
+                        <li>
+                            <Link
+                                to={'/inbox'}
+                                className="flex items-center gap-2"
+                            >
+                                <Mail className="w-4 h-4" />
+                                Inbox
+                            </Link>
                         </li>
                         <li>
                             {!user ? (

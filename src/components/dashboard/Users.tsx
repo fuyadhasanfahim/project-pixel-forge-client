@@ -1,6 +1,8 @@
 import { useGetAllUsersQuery } from '@/features/auth/authApi'
 import IUser from '@/types/userInterface'
 import { Link } from 'react-router-dom'
+import { Button } from '../ui/button'
+import { User2 } from 'lucide-react'
 
 export default function Users() {
     const { data, isLoading } = useGetAllUsersQuery([])
@@ -15,8 +17,17 @@ export default function Users() {
         )
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Users</h1>
+        <div className="p-4 space-y-8">
+            <div className="flex items-center justify-between gap-10">
+                <h1 className="text-2xl font-bold">Users</h1>
+
+                <Link to="/users/create-user">
+                    <Button className="flex items-center gap-2">
+                        <User2 /> Create User
+                    </Button>
+                </Link>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {users.map((user: IUser) => (
                     <Link to={`/dashboard/users/${user.username}`}>

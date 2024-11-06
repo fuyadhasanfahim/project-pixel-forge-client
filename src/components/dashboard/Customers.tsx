@@ -10,11 +10,11 @@ import {
 } from '../ui/table'
 import toast from 'react-hot-toast'
 import { useGetCustomersQuery } from '@/features/customer/customerApi'
-import ICustomerFormData from '@/types/customerInterface'
+import ICustomerInterface from '@/types/customerInterface'
 
 export default function Customers() {
     const { data, isLoading, error } = useGetCustomersQuery([])
-    const customers = (data?.customers as ICustomerFormData[]) || []
+    const customers = (data?.customers as ICustomerInterface[]) || []
 
     if (isLoading) {
         return <div>Loading...</div>
