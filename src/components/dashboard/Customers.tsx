@@ -11,6 +11,7 @@ import {
 import toast from 'react-hot-toast'
 import { useGetCustomersQuery } from '@/features/customer/customerApi'
 import ICustomerInterface from '@/types/customerInterface'
+import Customer from './Customer'
 
 export default function Customers() {
     const { data, isLoading, error } = useGetCustomersQuery([])
@@ -30,9 +31,7 @@ export default function Customers() {
             <div className="flex items-center justify-between w-full">
                 <h2 className="text-xl">All Customers</h2>
                 <Button>
-                    <Link to={'/customers/create-customer'}>
-                        Add Customer
-                    </Link>
+                    <Link to={'/customers/create-customer'}>Add Customer</Link>
                 </Button>
             </div>
 
@@ -40,7 +39,7 @@ export default function Customers() {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-green-500">
-                            <TableHead className="border border-black text-white">
+                            <TableHead className="border border-black text-white text-center">
                                 Customer Id
                             </TableHead>
                             <TableHead className="border border-black text-white">
@@ -52,26 +51,18 @@ export default function Customers() {
                             <TableHead className="border border-black text-white">
                                 Customer Address
                             </TableHead>
+                            <TableHead className="border border-black text-white text-center">
+                                Orders
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {customers.length > 0 ? (
-                            customers.map((customer) => (
-                                <TableRow key={customer.customerId}>
-                                    <TableCell className="border border-black">
-                                        {customer.customerId}
-                                    </TableCell>
-                                    <TableCell className="border border-black">
-                                        {customer.customerName}
-                                    </TableCell>
-                                    <TableCell className="border border-black">
-                                        {customer.customerEmail}
-                                    </TableCell>
-                                    <TableCell className="border border-black">
-                                        {customer.customerAddress}
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                            customers.map((customer, index) => {
+                                return (
+                                    <Customer key={index} customer={customer} />
+                                )
+                            })
                         ) : (
                             <TableRow>
                                 <TableCell

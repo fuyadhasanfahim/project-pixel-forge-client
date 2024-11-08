@@ -132,7 +132,7 @@ export default function InvoiceDetailsPDF() {
                         <img
                             src={LogoImage}
                             alt="Logo"
-                            className="h-[56px] w-fit"
+                            className="h-12 w-fit"
                         />
                         <div className="px-4 text-lg">
                             <p>
