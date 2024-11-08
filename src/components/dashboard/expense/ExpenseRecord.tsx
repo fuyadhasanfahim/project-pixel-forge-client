@@ -172,7 +172,7 @@ export default function ExpenseRecord() {
 
                 <div className="flex w-full items-center justify-end">
                     <Button>
-                        <Link to={'/dashboard/create-expense'}>
+                        <Link to={'/create-expense'}>
                             Add Expense
                         </Link>
                     </Button>

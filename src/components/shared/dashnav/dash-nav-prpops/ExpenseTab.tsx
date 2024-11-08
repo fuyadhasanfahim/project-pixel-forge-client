@@ -7,22 +7,22 @@ const tabs = [
     {
         id: 1,
         name: 'Expense Record',
-        link: '/dashboard/expense-record',
+        link: '/expense-record',
     },
     {
         id: 2,
         name: 'Create Expense',
-        link: '/dashboard/create-expense',
+        link: '/create-expense',
     },
     {
         id: 1,
         name: 'Expenses Head',
-        link: '/dashboard/expenses-head',
+        link: '/expenses-head',
     },
     {
         id: 1,
         name: 'Add Expenses Head',
-        link: '/dashboard/add-expenses-head',
+        link: '/add-expenses-head',
     },
 ]
 

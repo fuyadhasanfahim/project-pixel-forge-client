@@ -139,7 +139,7 @@ export default function ExpensesHead() {
                 </Pagination>
 
                 <div className="flex w-full items-center justify-end">
-                    <Link to={'/dashboard/add-expenses-head'}>
+                    <Link to={'/add-expenses-head'}>
                         <Button>Add Expense</Button>
                     </Link>
                 </div>

@@ -30,7 +30,7 @@ export default function Users() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {users.map((user: IUser) => (
-                    <Link to={`/dashboard/users/${user.username}`}>
+                    <Link to={`/users/${user.username}`}>
                         <div
                             key={user._id}
                             className="relative bg-white shadow-lg rounded-lg p-6 flex flex-col items-center ring-1 ring-gray-800/5 transform hover:scale-105 duration-300 transition-all"

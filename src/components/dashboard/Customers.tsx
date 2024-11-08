@@ -30,7 +30,7 @@ export default function Customers() {
             <div className="flex items-center justify-between w-full">
                 <h2 className="text-xl">All Customers</h2>
                 <Button>
-                    <Link to={'/dashboard/customers/create-customer'}>
+                    <Link to={'/customers/create-customer'}>
                         Add Customer
                     </Link>
                 </Button>

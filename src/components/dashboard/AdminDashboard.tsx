@@ -148,7 +148,7 @@ export default function AdminDashboard() {
                     <button
                         className="underline"
                         onClick={() =>
-                            navigate(`/dashboard/view-order-info/${order._id}`)
+                            navigate(`/view-order-info/${order._id}`)
                         }
                     >
                         View

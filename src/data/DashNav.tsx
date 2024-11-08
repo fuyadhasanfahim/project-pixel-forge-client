@@ -10,7 +10,7 @@ import {
 
 export const navItems = [
     {
-        to: '/dashboard',
+        to: '/',
         label: 'Dashboard',
         icon: <Home className="h-5 w-5" />,
         roles: ['superAdmin', 'admin', 'user', 'teamManager', 'teamLeader'],
@@ -55,8 +55,8 @@ export const navItems = [
 ]
 
 export const expenseTabs = [
-    { name: 'Expense Record', link: '/dashboard/expense-record' },
-    { name: 'Create Expense', link: '/dashboard/create-expense' },
-    { name: 'Expenses Head', link: '/dashboard/expenses-head' },
-    { name: 'Add Expenses Head', link: '/dashboard/add-expenses-head' },
+    { name: 'Expense Record', link: '/expense-record' },
+    { name: 'Create Expense', link: '/create-expense' },
+    { name: 'Expenses Head', link: '/expenses-head' },
+    { name: 'Add Expenses Head', link: '/add-expenses-head' },
 ]

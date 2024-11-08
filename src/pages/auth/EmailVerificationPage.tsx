@@ -28,7 +28,7 @@ const EmailVerificationPage = () => {
     useEffect(() => {
         if (isSuccess) {
             setTimeout(() => {
-                navigate('/dashboard')
+                navigate('/')
             }, 2000)
         }
     }, [isSuccess, navigate])
