@@ -22,8 +22,8 @@ export const navItems = [
         roles: ['superAdmin', 'admin', 'user'],
     },
     {
-        to: '/previous-orders',
-        label: 'Previous Orders',
+        to: '/orders',
+        label: 'Orders',
         icon: <ShoppingCart className="h-5 w-5" />,
         badge: 6,
         roles: ['superAdmin', 'admin', 'user'],

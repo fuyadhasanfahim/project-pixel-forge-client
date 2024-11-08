@@ -115,7 +115,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/previous-orders"
+                    path="/orders"
                     element={
                         <PrivateRoute>
                             <PreviousOrdersPage />

@@ -105,7 +105,7 @@ textarea::-webkit-scrollbar {
 
 @media print {
     #print-content {
-        @apply grid grid-flow-row items-center justify-center w-full h-3/4 p-10;
+        @apply grid grid-flow-row items-center justify-center w-full h-[100%] p-10;
     }
 
     #print-content img {

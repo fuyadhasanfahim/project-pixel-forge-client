@@ -183,11 +183,6 @@ export default function AddOrderForm() {
                     selectedServices={selectedServices}
                 />
 
-                <Instructions
-                    instructions={instructions}
-                    setInstructions={setInstructions}
-                />
-
                 <div className="flex items-center flex-wrap gap-5 w-full">
                     <Inputs
                         type={'text'}
@@ -270,6 +265,11 @@ export default function AddOrderForm() {
                     <DeliveryDate date={date} setDate={setDate} />
                     <DeliveryTime setTime={setTime} />
                 </div>
+
+                <Instructions
+                    instructions={instructions}
+                    setInstructions={setInstructions}
+                />
 
                 <div className="flex justify-center">
                     <Button type="submit" disabled={isLoading}>

@@ -50,8 +50,8 @@ export default function Sidebar() {
             roles: ['superAdmin', 'admin', 'user'],
         },
         {
-            to: '/previous-orders',
-            label: 'Previous Orders',
+            to: '/orders',
+            label: 'Orders',
             icon: <ShoppingCart className="h-4 w-4" />,
             roles: ['superAdmin', 'admin', 'user'],
             badge: data?.orders?.length ?? 0,
@@ -96,7 +96,10 @@ export default function Sidebar() {
     )
 
     return (
-        <div className="hidden border-r bg-muted/40 md:block h-full" id='sidebar'>
+        <div
+            className="hidden border-r bg-muted/40 md:block h-full"
+            id="sidebar"
+        >
             <div className="flex h-full max-h-screen flex-col gap-2 mt-2">
                 <div className="flex-1 overflow-y-auto">
                     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
