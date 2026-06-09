@@ -9,7 +9,7 @@ export const orderApi = apiSlice.injectEndpoints({
                 return new Promise((resolve, reject) => {
                     xhr.open(
                         'POST',
-                        'http://localhost:5000/api/v1/orders/upload-files',
+                        'https://portal.backendsafe.com/api/v1/orders/upload-files',
                     )
 
                     xhr.upload.onprogress = (event) => {

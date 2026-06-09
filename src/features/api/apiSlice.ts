@@ -5,7 +5,7 @@ import Cookies from 'js-cookie'
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:5000/api/v1/',
+        baseUrl: 'https://portal.backendsafe.com/api/v1/',
         prepareHeaders: (headers) => {
             const token = Cookies.get('accessToken')
 
