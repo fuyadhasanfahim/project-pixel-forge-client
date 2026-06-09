@@ -1,5 +1,9 @@
 interface IOrders {
-    customerId: any
+    length: number
+    createdAt: string
+    email: string
+    orderId: string
+    customerId: string
     name: string
     invoiceNumber: string
     totalPrice: number
@@ -24,6 +28,7 @@ interface IOrders {
     folderUrl: string
     images: string
     orderName: string
+    pricePerImage: string
 }
 
 export default IOrders

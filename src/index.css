@@ -102,3 +102,13 @@
 textarea::-webkit-scrollbar {
     display: none;
 }
+
+@media print {
+    #print-content {
+        @apply grid grid-flow-row items-center justify-center w-full h-[100%] p-10;
+    }
+
+    #print-content img {
+        @apply h-9 w-fit;
+    }
+}

@@ -36,7 +36,7 @@ export default function Messages() {
     }, [refetch])
 
     return (
-        <div className="flex flex-col h-screen w-3/4 bg-white border-l">
+        <div className="flex flex-col w-3/4 bg-white h-[88.5vh]">
             {otherUser && (
                 <div className="border-b flex items-center gap-2 p-[7.5px]">
                     <Avatar>

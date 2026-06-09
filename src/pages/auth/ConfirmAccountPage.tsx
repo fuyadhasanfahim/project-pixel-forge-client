@@ -36,7 +36,7 @@ export default function ConfirmAccountPage() {
 
     useEffect(() => {
         if (user?.isVerified) {
-            navigate('/dashboard', { replace: true })
+            navigate('/', { replace: true })
         }
     }, [navigate, user])
 

@@ -21,7 +21,7 @@ export default function PrivateRoute({
     if (!isLoggedIn) return <Navigate to="/auth" replace />
 
     if (allowedRoles && !allowedRoles.includes(role)) {
-        return <Navigate to="/dashboard" replace />
+        return <Navigate to="/" replace />
     }
 
     return <>{children}</>

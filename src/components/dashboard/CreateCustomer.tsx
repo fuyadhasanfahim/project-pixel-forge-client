@@ -28,7 +28,7 @@ export default function CreateCustomer() {
 
             toast.success(result.message || 'Customer created successfully!')
 
-            navigate('/dashboard/customers')
+            navigate('/customers')
         } catch (err) {
             toast.error((err as Error).message)
         }

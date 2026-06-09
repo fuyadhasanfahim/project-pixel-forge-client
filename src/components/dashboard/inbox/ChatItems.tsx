@@ -23,10 +23,10 @@ export default function ChatItems() {
 
                 return (
                     <Link
-                        to={`/dashboard/inbox/${conversation._id}`}
+                        to={`/inbox/${conversation._id}`}
                         key={conversation._id}
                     >
-                        <div className="flex items-center gap-x-3 border p-2 rounded-lg hover:bg-gray-100 duration-300 transition-all mx-2 my-2">
+                        <div className="flex items-center gap-x-3 border p-2 rounded-lg hover:bg-gray-100 duration-300 transition-all mx-2 mb-2">
                             {otherUser && (
                                 <Avatar key={otherUser._id}>
                                     <AvatarImage

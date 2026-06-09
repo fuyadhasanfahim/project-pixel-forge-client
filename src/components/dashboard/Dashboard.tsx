@@ -2,14 +2,19 @@ import { useFetchAllOrdersQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import IUser from '@/types/userInterface'
 
-export default function AdminDashboard() {
+export default function Dashboard() {
     const {
         data: ordersData,
         isLoading: ordersLoading,
         error: ordersError,
     } = useFetchAllOrdersQuery([])
     const navigate = useNavigate()
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { role } = user as IUser
 
     const orders = ordersData?.orders || []
 
@@ -77,7 +82,6 @@ export default function AdminDashboard() {
                                 className="bg-white p-6 ring-1 ring-gray-500/5 rounded-2xl shadow-lg transition-transform hover:scale-105 duration-300 ease-in-out"
                             >
                                 <div className="flex flex-col gap-4">
-                                    {/* Customer Id */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Customer Id
@@ -87,7 +91,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Delivery Date */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Delivery Date
@@ -99,7 +102,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Images */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Images
@@ -109,7 +111,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Price */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Total Price
@@ -119,7 +120,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Status */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Status
@@ -133,7 +133,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Services */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Services
@@ -143,7 +142,6 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    {/* Invoice Number */}
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm text-gray-500 font-medium">
                                             Invoice Number
@@ -153,16 +151,20 @@ export default function AdminDashboard() {
                                         </p>
                                     </div>
 
-                                    <Button
-                                        className="underline"
-                                        onClick={() =>
-                                            navigate(
-                                                `/dashboard/view-order-info/${order._id}`,
-                                            )
-                                        }
-                                    >
-                                        View
-                                    </Button>
+                                    {(role === 'user' ||
+                                        role === 'admin' ||
+                                        role === 'superAdmin') && (
+                                        <Button
+                                            className="underline"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/view-order-info/${order._id}`,
+                                                )
+                                            }
+                                        >
+                                            View
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         )

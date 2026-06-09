@@ -12,6 +12,7 @@ import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
 import IUser from '@/types/userInterface'
 import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
 export default function PreviousOrders() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -32,13 +33,13 @@ export default function PreviousOrders() {
     const getStatusColor = (status: string): string => {
         switch (status) {
             case 'pending':
-                return 'text-green-500'
+                return 'text-yellow-500'
             case 'canceled':
                 return 'text-red-500'
             case 'request for additional information':
-                return 'text-red-500'
+                return 'text-violate-500'
             case 'completed':
-                return 'text-yellow-500'
+                return 'text-green-500'
             case 'inprogress':
                 return 'text-blue-500'
             case 'delivered':
@@ -51,9 +52,7 @@ export default function PreviousOrders() {
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
-                <h1 className="text-lg font-semibold md:text-2xl">
-                    Previous Orders
-                </h1>
+                <h1 className="text-lg font-semibold md:text-2xl">Orders</h1>
             </div>
             <Table className="border rounded-md">
                 <TableCaption className="mb-3">
@@ -61,27 +60,44 @@ export default function PreviousOrders() {
                 </TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">Invoice</TableHead>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Services</TableHead>
-                        <TableHead>Complexities</TableHead>
-                        <TableHead>Delivery Date</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Invoice
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Username
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Services
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Complexities
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Delivery Date
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Status
+                        </TableHead>
+                        <TableHead className="border border-black bg-green-500 text-white">
+                            Action
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {orders.map((order: IOrders) => (
                         <TableRow key={order._id}>
-                            <TableCell className="font-medium">
-                                {order._id}
+                            <TableCell className="font-medium border border-black">
+                                {order.invoiceNumber}
                             </TableCell>
-                            <TableCell>{order.username}</TableCell>
-                            <TableCell>
+                            <TableCell className="border border-black">
+                                {order.username}
+                            </TableCell>
+                            <TableCell className="border border-black">
                                 {order.services.length > 0
                                     ? order.services.join(', ')
                                     : 'No services available'}{' '}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="border border-black">
                                 {order.complexities &&
                                 Object.keys(order.complexities).length > 0
                                     ? Object.entries(order.complexities).map(
@@ -93,17 +109,25 @@ export default function PreviousOrders() {
                                       )
                                     : 'No complexities available'}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="border border-black">
                                 {new Date(
                                     order.deliveryDate,
                                 ).toLocaleDateString()}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="border border-black">
                                 <span
                                     className={`font-semibold ${getStatusColor(order.status)}`}
                                 >
                                     {order.status}
                                 </span>
+                            </TableCell>
+                            <TableCell className="border border-black">
+                                <Link
+                                    to={`/view-order-info/${order._id}`}
+                                    className="text-blue-500 underline"
+                                >
+                                    View
+                                </Link>
                             </TableCell>
                         </TableRow>
                     ))}

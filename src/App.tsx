@@ -25,6 +25,12 @@ import ExpenseRecordPage from './pages/dashboard/expense-page/ExpenseRecordPage'
 import ExpensesHeadPage from './pages/dashboard/expense-page/ExpensesHeadPage'
 import CustomersPage from './pages/dashboard/CustomersPage'
 import CreateCustomerPage from './pages/dashboard/CreateCustomerPage'
+import Navbar from './components/shared/navbar/Navbar'
+import CreateUserPage from './pages/dashboard/CreateUserPage'
+import UsersPage from './pages/dashboard/UsersPage'
+import InvoicePage from './pages/dashboard/InvoicePage'
+import InvoiceDetailsPage from './pages/dashboard/InvoiceDetailsPage'
+import InvoiceDetailsPDFPage from './pages/dashboard/InvoiceDetailsPDFPage'
 
 export default function App() {
     const { user } = useSelector((state: RootState) => state.auth)
@@ -41,6 +47,7 @@ export default function App() {
         </div>
     ) : (
         <BrowserRouter>
+            <Navbar />
             <Routes>
                 <Route
                     path="/auth"
@@ -92,7 +99,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard"
+                    path="/"
                     element={
                         <PrivateRoute>
                             <DashboardPage />
@@ -100,7 +107,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/add-order"
+                    path="/add-order"
                     element={
                         <PrivateRoute>
                             <AddOrderPage />
@@ -108,7 +115,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/previous-orders"
+                    path="/orders"
                     element={
                         <PrivateRoute>
                             <PreviousOrdersPage />
@@ -116,7 +123,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/view-order-info/:orderId"
+                    path="/view-order-info/:orderId"
                     element={
                         <PrivateRoute>
                             <OrderInfoPage />
@@ -124,7 +131,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/inbox"
+                    path="/inbox"
                     element={
                         <PrivateRoute allowedRoles={['superAdmin']}>
                             <OnlyInboxPage />
@@ -132,7 +139,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/inbox/:conversationId"
+                    path="inbox/:conversationId"
                     element={
                         <PrivateRoute allowedRoles={['superAdmin']}>
                             <InboxPage />
@@ -140,7 +147,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/expenses-head"
+                    path="/expenses-head"
                     element={
                         <PrivateRoute>
                             <ExpensesHeadPage />
@@ -148,7 +155,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/expense-record"
+                    path="/expense-record"
                     element={
                         <PrivateRoute>
                             <ExpenseRecordPage />
@@ -156,7 +163,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/create-expense"
+                    path="/create-expense"
                     element={
                         <PrivateRoute>
                             <CreateExpensePage />
@@ -164,7 +171,7 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/add-expenses-head"
+                    path="/add-expenses-head"
                     element={
                         <PrivateRoute>
                             <AddExpensesHeadPage />
@@ -172,7 +179,32 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/customers"
+                    path="/invoices"
+                    element={
+                        <PrivateRoute>
+                            <InvoicePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/invoices/:customerId"
+                    element={
+                        <PrivateRoute>
+                            <InvoiceDetailsPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/invoices/download/:customerId"
+                    element={
+                        <PrivateRoute>
+                            <InvoiceDetailsPDFPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/customers"
                     element={
                         <PrivateRoute>
                             <CustomersPage />
@@ -180,10 +212,26 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/dashboard/customers/create-customer"
+                    path="/customers/create-customer"
                     element={
                         <PrivateRoute>
                             <CreateCustomerPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="users/create-user"
+                    element={
+                        <PrivateRoute>
+                            <CreateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/users"
+                    element={
+                        <PrivateRoute>
+                            <UsersPage />
                         </PrivateRoute>
                     }
                 />
